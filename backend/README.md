@@ -31,6 +31,56 @@
 $ npm install
 ```
 
+## Configuration
+
+### Environment Variables
+
+This project uses environment variables with a priority system for configuration:
+
+**Priority Order:**
+1. **`.env.local`** (highest priority - local development overrides)
+2. **`.env`** (fallback - shared/team configuration)
+
+**Setup Instructions:**
+
+```bash
+# For shared/team configuration (optional fallback)
+cp env.example.txt .env
+
+# For local development overrides (recommended)
+cp env.local.example .env.local
+
+# Edit the files with your actual values
+```
+
+**Why this priority system?**
+- `.env.local` allows developers to have local overrides without affecting team configuration
+- `.env` serves as a fallback for shared settings
+- `.env.local` is automatically ignored by git (recommended for local development)
+
+**Required Environment Variables:**
+
+- `SUPABASE_URL`: Your Supabase project URL
+- `SUPABASE_ANON_KEY`: Your Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
+- `NODE_ENV`: Environment (development/production/test)
+- `PORT`: Server port (default: 3000)
+
+**Optional Environment Variables:**
+
+- `SWAGGER_USER`: Username for Swagger documentation access
+- `SWAGGER_PASSWORD`: Password for Swagger documentation access
+
+### Supabase Setup
+
+1. Create a Supabase project at [supabase.com](https://supabase.com)
+2. Get your project URL and keys from the project settings
+3. Update your `.env` file with the actual values
+
+### Swagger Documentation
+
+API documentation is available at `/api` when running in development mode.
+
 ## Compile and run the project
 
 ```bash

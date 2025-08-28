@@ -1,12 +1,12 @@
+// Load environment variables FIRST, before any other imports
+import { loadEnvironment } from './config/env.loader';
+loadEnvironment();
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ENV } from './common/constants/string-const';
-import * as dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
