@@ -7,6 +7,7 @@ export enum ENV {
   PORT = 'PORT',
   SWAGGER_USER = 'SWAGGER_USER',
   SWAGGER_PASSWORD = 'SWAGGER_PASSWORD',
+  FRONTEND_URL = 'FRONTEND_URL',
   
   // Database Configuration
   DATABASE_URL = 'DATABASE_URL',
@@ -37,6 +38,13 @@ export enum MESSAGES {
   TOKEN_EXPIRED = 'Token expired',
   USER_NOT_FOUND = 'User not found',
   TASK_NOT_FOUND = 'Task not found',
+  LOGIN_SUCCESSFUL = 'Login successful',
+  SIGNUP_SUCCESSFUL = 'Account created successfully',
+  PASSWORD_RESET_SENT = 'Password reset email sent',
+  INVALID_CREDENTIALS = 'Invalid email or password',
+  EMAIL_ALREADY_EXISTS = 'Email already exists',
+  WEAK_PASSWORD = 'Password is too weak',
+  INVALID_EMAIL = 'Invalid email format',
   
   // Supabase
   SUPABASE_CONNECTION_ERROR = 'Failed to connect to database',

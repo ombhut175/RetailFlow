@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { SupabaseModule } from './core/supabase/supabase.module';
 import { DatabaseModule } from './core/database/database.module';
 import { TestModule } from './modules/test/test.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { envValidationSchema } from './config/env.validation';
 
 @Module({
@@ -20,6 +21,7 @@ import { envValidationSchema } from './config/env.validation';
     SupabaseModule,
     DatabaseModule,
     TestModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
