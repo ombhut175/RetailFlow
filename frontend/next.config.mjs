@@ -9,6 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  env: {
+    PORT: '3656'
+  }
 }
 
 export default nextConfig
