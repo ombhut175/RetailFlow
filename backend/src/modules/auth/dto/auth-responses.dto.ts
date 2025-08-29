@@ -26,6 +26,42 @@ export class AuthTokensDto {
   expires_in: number;
 }
 
+export class PublicUserInfoDto {
+  @ApiProperty({
+    description: 'Public user record UUID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    format: 'uuid',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'User email address',
+    example: 'john.doe@example.com',
+    format: 'email',
+  })
+  email: string;
+
+  @ApiProperty({
+    description: 'Whether the user email is verified in our system',
+    example: true,
+  })
+  isEmailVerified: boolean;
+
+  @ApiProperty({
+    description: 'Account creation timestamp',
+    example: '2023-11-01T10:00:00.000Z',
+    format: 'date-time',
+  })
+  createdAt: string;
+
+  @ApiProperty({
+    description: 'Last account update timestamp',
+    example: '2023-12-01T10:00:00.000Z',
+    format: 'date-time',
+  })
+  updatedAt: string;
+}
+
 export class UserInfoDto {
   @ApiProperty({
     description: 'Unique user identifier',
@@ -50,6 +86,12 @@ export class UserInfoDto {
   email_confirmed_at?: string;
 
   @ApiProperty({
+    description: 'Whether the user email is verified in our system',
+    example: true,
+  })
+  isEmailVerified: boolean;
+
+  @ApiProperty({
     description: 'Account creation timestamp',
     example: '2023-11-01T10:00:00.000Z',
     format: 'date-time',
@@ -72,24 +114,50 @@ export class LoginResponseDataDto {
   tokens: AuthTokensDto;
 
   @ApiProperty({
-    description: 'User information',
+    description: 'Supabase user information',
     type: UserInfoDto,
   })
   user: UserInfoDto;
+
+  @ApiProperty({
+    description: 'Public user record information',
+    type: PublicUserInfoDto,
+    nullable: true,
+  })
+  publicUser?: PublicUserInfoDto;
+
+  @ApiProperty({
+    description: 'Whether the user email is verified',
+    example: true,
+  })
+  isEmailVerified: boolean;
 }
 
 export class SignupResponseDataDto {
   @ApiProperty({
-    description: 'User information for newly created account',
+    description: 'Supabase user information for newly created account',
     type: UserInfoDto,
   })
   user: UserInfoDto;
+
+  @ApiProperty({
+    description: 'Public user record information',
+    type: PublicUserInfoDto,
+    nullable: true,
+  })
+  publicUser?: PublicUserInfoDto;
 
   @ApiProperty({
     description: 'Message about email confirmation',
     example: 'Please check your email for confirmation instructions',
   })
   message: string;
+
+  @ApiProperty({
+    description: 'Whether email confirmation is required',
+    example: true,
+  })
+  emailConfirmationRequired: boolean;
 }
 
 export class ForgotPasswordResponseDataDto {

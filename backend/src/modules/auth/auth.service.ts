@@ -1,5 +1,6 @@
 import { Injectable, Logger, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { SupabaseService } from '../../core/supabase/supabase.service';
+import { UsersRepository } from '../../core/database/repositories';
 import { MESSAGES } from '../../common/constants/string-const';
 import { LoginDto, SignupDto, ForgotPasswordDto } from './dto';
 
@@ -7,7 +8,10 @@ import { LoginDto, SignupDto, ForgotPasswordDto } from './dto';
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly usersRepository: UsersRepository,
+  ) {}
 
   async login(loginDto: LoginDto) {
     try {
@@ -32,11 +36,42 @@ export class AuthService {
         throw new UnauthorizedException(error.message);
       }
 
+      // Check if user exists in public.users table and verify status
+      let publicUser = null;
+      if (data.user) {
+        try {
+          publicUser = await this.usersRepository.findById(data.user.id);
+          
+          if (!publicUser) {
+            // Create public user record if it doesn't exist (for existing Supabase users)
+            publicUser = await this.usersRepository.create({
+              id: data.user.id, // Use Supabase user ID as the UUID id
+              email: loginDto.email,
+              isEmailVerified: !!data.user.email_confirmed_at,
+            });
+            this.logger.log(`Created missing public user record for ${loginDto.email}`);
+          } else {
+            // Update verification status based on Supabase auth status
+            if (data.user.email_confirmed_at && !publicUser.isEmailVerified) {
+              publicUser = await this.usersRepository.update(publicUser.id, {
+                isEmailVerified: true,
+              });
+              this.logger.log(`Updated email verification status for ${loginDto.email}`);
+            }
+          }
+        } catch (dbError) {
+          this.logger.error(`Database error during login for ${loginDto.email}: ${dbError.message}`);
+          // Continue with login even if public user operations fail
+        }
+      }
+
       this.logger.log(`User ${loginDto.email} logged in successfully`);
       return {
         message: MESSAGES.LOGIN_SUCCESSFUL,
         user: data.user,
         session: data.session,
+        publicUser,
+        isEmailVerified: publicUser?.isEmailVerified || false,
       };
     } catch (error) {
       if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
@@ -76,12 +111,30 @@ export class AuthService {
         throw new BadRequestException(error.message);
       }
 
+      // Create user record in public.users table
+      let publicUser = null;
+      if (data.user) {
+        try {
+          publicUser = await this.usersRepository.create({
+            id: data.user.id, // Use Supabase user ID as the UUID id
+            email: signupDto.email,
+            isEmailVerified: false, // Set as false initially
+          });
+          this.logger.log(`Public user record created for ${signupDto.email}`);
+        } catch (dbError) {
+          this.logger.error(`Failed to create public user record for ${signupDto.email}: ${dbError.message}`);
+          // Note: We don't fail the signup if public user creation fails
+          // The Supabase auth user still exists and can be recovered
+        }
+      }
+
       this.logger.log(`User ${signupDto.email} signed up successfully`);
 
       return {
         message: MESSAGES.SIGNUP_SUCCESSFUL,
         user: data.user,
         session: data.session,
+        publicUser,
         emailConfirmationRequired: !data.session, // If no session, email confirmation is required
       };
     } catch (error) {

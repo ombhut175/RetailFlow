@@ -72,3 +72,8 @@ export enum QUEUES {
   EMAILS = 'emails',
   NOTIFICATIONS = 'notifications',
 }
+
+// Cookie Keys
+export enum COOKIES {
+  AUTH_TOKEN = 'auth_token',
+}
