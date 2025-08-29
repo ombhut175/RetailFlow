@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SupabaseModule } from './core/supabase/supabase.module';
+import { DatabaseModule } from './core/database/database.module';
 import { TestModule } from './modules/test/test.module';
 import { envValidationSchema } from './config/env.validation';
 
@@ -17,6 +18,7 @@ import { envValidationSchema } from './config/env.validation';
       },
     }),
     SupabaseModule,
+    DatabaseModule,
     TestModule,
   ],
   controllers: [AppController],

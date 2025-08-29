@@ -7,6 +7,14 @@ export enum ENV {
   PORT = 'PORT',
   SWAGGER_USER = 'SWAGGER_USER',
   SWAGGER_PASSWORD = 'SWAGGER_PASSWORD',
+  
+  // Database Configuration
+  DATABASE_URL = 'DATABASE_URL',
+  DATABASE_HOST = 'DATABASE_HOST',
+  DATABASE_PORT = 'DATABASE_PORT',
+  DATABASE_NAME = 'DATABASE_NAME',
+  DATABASE_USER = 'DATABASE_USER',
+  DATABASE_PASSWORD = 'DATABASE_PASSWORD',
 }
 
 // Common Messages
@@ -28,6 +36,7 @@ export enum MESSAGES {
   INVALID_TOKEN = 'Invalid token',
   TOKEN_EXPIRED = 'Token expired',
   USER_NOT_FOUND = 'User not found',
+  TASK_NOT_FOUND = 'Task not found',
   
   // Supabase
   SUPABASE_CONNECTION_ERROR = 'Failed to connect to database',
