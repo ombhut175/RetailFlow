@@ -22,6 +22,10 @@ export const envValidationSchema = Joi.object({
   // Swagger Configuration (Optional)
   [ENV.SWAGGER_USER]: Joi.string().optional(),
   [ENV.SWAGGER_PASSWORD]: Joi.string().optional(),
+  [ENV.SWAGGER_ENABLED]: Joi.boolean().optional().default(true),
+  [ENV.SWAGGER_UI_DEEP_LINKING]: Joi.boolean().optional().default(true),
+  [ENV.SWAGGER_UI_DOC_EXPANSION]: Joi.string().valid('list', 'full', 'none').optional().default('none'),
+  [ENV.SWAGGER_UI_FILTER]: Joi.alternatives().try(Joi.boolean(), Joi.string()).optional().default(true),
 
   // Frontend URL for auth redirects
   [ENV.FRONTEND_URL]: Joi.string().uri().optional().default('http://localhost:3000'),

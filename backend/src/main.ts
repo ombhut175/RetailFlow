@@ -5,6 +5,7 @@ loadEnvironment();
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as basicAuth from 'express-basic-auth';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ENV } from './common/constants/string-const';
 import * as cookieParser from 'cookie-parser';
@@ -27,8 +28,21 @@ async function bootstrap() {
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Swagger configuration (only in non-production environments)
-  if (process.env[ENV.NODE_ENV] !== 'production') {
+  // Swagger configuration (only in non-production environments unless explicitly disabled)
+  const isProd = process.env[ENV.NODE_ENV] === 'production';
+  const swaggerEnabled = (process.env[ENV.SWAGGER_ENABLED] ?? 'true').toString() === 'true';
+  if (!isProd && swaggerEnabled) {
+    const swaggerUser = process.env[ENV.SWAGGER_USER];
+    const swaggerPassword = process.env[ENV.SWAGGER_PASSWORD];
+
+    // Optional basic auth protection for Swagger UI if credentials provided
+    if (swaggerUser && swaggerPassword) {
+      app.use(['/api/docs', '/api-json'], basicAuth({
+        users: { [swaggerUser]: swaggerPassword },
+        challenge: true,
+      }));
+    }
+
     const config = new DocumentBuilder()
       .setTitle('Backend API Documentation')
       .setDescription('API description for the backend service')
@@ -37,15 +51,34 @@ async function bootstrap() {
       .build();
     
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
+
+    // UI configuration to improve developer experience
+    const deepLinking = (process.env[ENV.SWAGGER_UI_DEEP_LINKING] ?? 'true').toString() === 'true';
+    const docExpansion = (process.env[ENV.SWAGGER_UI_DOC_EXPANSION] ?? 'none').toString() as 'list' | 'full' | 'none';
+    const filterEnv = process.env[ENV.SWAGGER_UI_FILTER];
+    const filter = filterEnv === undefined ? true : (filterEnv === 'true' ? true : (filterEnv === 'false' ? false : filterEnv));
+
+    SwaggerModule.setup('api/docs', app, document, {
+      swaggerOptions: {
+        deepLinking,
+        docExpansion,
+        filter,
+        displayRequestDuration: true,
+        tryItOutEnabled: true,
+        tagsSorter: 'alpha',
+        operationsSorter: 'alpha',
+        defaultModelsExpandDepth: -1,
+      },
+      customSiteTitle: 'Backend API Docs',
+    });
   }
 
   const port = process.env[ENV.PORT] || 3000;
   await app.listen(port);
   
   console.log(`🚀 Application is running on: http://localhost:${port}`);
-  if (process.env[ENV.NODE_ENV] !== 'production') {
-    console.log(`📚 Swagger documentation available at: http://localhost:${port}/api`);
+  if (!isProd && swaggerEnabled) {
+    console.log(`📚 Swagger documentation available at: http://localhost:${port}/api/docs`);
   }
 }
 bootstrap();
