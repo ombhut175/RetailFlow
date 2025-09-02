@@ -1,257 +1,116 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock, User, Sparkles, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { EdtechBg } from "@/components/visuals/edtech-bg";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-
-const schema = z
-  .object({
-    name: z.string().min(2, { message: "Please enter your full name" }),
-    email: z.string().email({ message: "Enter a valid email" }),
-    password: z.string().min(6, { message: "Min 6 characters" }),
-    confirmPassword: z.string().min(6, { message: "Min 6 characters" }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type FormValues = z.infer<typeof schema>;
-
-const pageVariants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import AuthCard, { Field, Input, PasswordInput, SubmitButton, MutedLink } from "../_components/auth-card";
 
 export default function SignupPage() {
-  const [loading, setLoading] = useState(false);
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
-  });
+  const router = useRouter();
+  const [loading, setLoading] = React.useState(false);
+  const [errors, setErrors] = React.useState<{ name?: string; email?: string; password?: string; confirm?: string } | null>(null);
 
-  const onSubmit = async (values: FormValues) => {
+  function validate(form: FormData) {
+    const name = String(form.get("name") || "").trim();
+    const email = String(form.get("email") || "").trim();
+    const password = String(form.get("password") || "");
+    const confirm = String(form.get("confirm") || "");
+    const nextErrors: { name?: string; email?: string; password?: string; confirm?: string } = {};
+    if (!name) nextErrors.name = "Your name is required";
+    if (!email) nextErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) nextErrors.email = "Enter a valid email";
+    if (!password) nextErrors.password = "Password is required";
+    else if (password.length < 8) nextErrors.password = "At least 8 characters";
+    if (confirm !== password) nextErrors.confirm = "Passwords do not match";
+    return { name, email, password, confirm, nextErrors };
+  }
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const { nextErrors } = validate(form);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return;
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setLoading(false);
-    console.log("signup:", values);
-  };
+    try {
+      await new Promise((r) => setTimeout(r, 1200));
+      router.push("/quodo/login");
+    } catch (e) {
+      setErrors({ email: "Email already in use" });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="show"
-      variants={pageVariants}
-      className="relative min-h-[calc(100svh-3.5rem)]"
-    >
-      <EdtechBg />
-      <div className="container mx-auto grid place-items-center py-12 relative">
-        {/* Form */}
-        <div className="w-full max-w-md mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <div className="fx-glow-border rounded-2xl">
-              <Card className="relative z-[1] border-0 bg-card/60 backdrop-blur-xl shadow-2xl rounded-2xl transition-transform will-change-transform hover:-translate-y-0.5">
-                <CardHeader className="space-y-1">
-                  <CardTitle className="text-3xl">Create account</CardTitle>
-                  <CardDescription>
-                    Unlock courses, tracks, and personalized recommendations
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="space-y-6"
-                    >
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="sr-only">Full name</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-
-                                <Input
-                                  id="name"
-                                  placeholder=" "
-                                  className="pl-9 peer placeholder-transparent transition-shadow focus:shadow-[0_0_0_4px] focus:shadow-primary/10"
-                                  {...field}
-                                />
-
-                                <label
-                                  htmlFor="name"
-                                  className="pointer-events-none absolute left-9 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-xs"
-                                >
-                                  Full name
-                                </label>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="sr-only">Email</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-
-                                <Input
-                                  id="signup-email"
-                                  type="email"
-                                  placeholder=" "
-                                  className="pl-9 peer placeholder-transparent transition-shadow focus:shadow-[0_0_0_4px] focus:shadow-primary/10"
-                                  {...field}
-                                />
-
-                                <label
-                                  htmlFor="signup-email"
-                                  className="pointer-events-none absolute left-9 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-xs"
-                                >
-                                  Email
-                                </label>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="sr-only">Password</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-
-                                <Input
-                                  id="signup-password"
-                                  type="password"
-                                  placeholder=" "
-                                  className="pl-9 peer placeholder-transparent transition-shadow focus:shadow-[0_0_0_4px] focus:shadow-primary/10"
-                                  {...field}
-                                />
-
-                                <label
-                                  htmlFor="signup-password"
-                                  className="pointer-events-none absolute left-9 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-xs"
-                                >
-                                  Password
-                                </label>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="sr-only">
-                              Confirm password
-                            </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-
-                                <Input
-                                  id="confirm-password"
-                                  type="password"
-                                  placeholder=" "
-                                  className="pl-9 peer placeholder-transparent transition-shadow focus:shadow-[0_0_0_4px] focus:shadow-primary/10"
-                                  {...field}
-                                />
-
-                                <label
-                                  htmlFor="confirm-password"
-                                  className="pointer-events-none absolute left-9 top-2 text-xs text-muted-foreground transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-xs"
-                                >
-                                  Confirm password
-                                </label>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <motion.div
-                        whileHover={{ y: -1 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Button
-                          type="submit"
-                          className="w-full btn-super"
-                          disabled={loading}
-                        >
-                          {loading ? (
-                            <span className="inline-flex items-center gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />{" "}
-                              Creating...
-                            </span>
-                          ) : (
-                            "Create Account"
-                          )}
-                        </Button>
-                      </motion.div>
-
-                      <p className="text-center text-sm text-muted-foreground">
-                        Already have an account?{" "}
-                        <Link
-                          href="/login"
-                          className="text-primary link-underline-anim"
-                        >
-                          Login
-                        </Link>
-                      </p>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
+    <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 md:grid-cols-2">
+      <div className="order-2 md:order-1">
+        <AuthCard
+          title="Create your account"
+          subtitle="Join thousands of learners accelerating their careers"
+          footer={
+            <div className="space-x-1">
+              <span>Already have an account?</span>
+              <MutedLink href="/quodo/login">Sign in</MutedLink>
             </div>
-          </motion.div>
+          }
+        >
+          <form className="grid gap-4" onSubmit={onSubmit}>
+            <Field label="Full name" error={errors?.name}>
+              <Input name="name" placeholder="Alex Johnson" autoComplete="name" required />
+            </Field>
+
+            <Field label="Email" error={errors?.email}>
+              <Input name="email" type="email" inputMode="email" placeholder="you@school.edu" autoComplete="email" required />
+            </Field>
+
+            <Field label="Password" hint="Use at least 8 characters." error={errors?.password}>
+              <PasswordInput name="password" placeholder="••••••••" autoComplete="new-password" required />
+            </Field>
+
+            <Field label="Confirm password" error={errors?.confirm}>
+              <PasswordInput name="confirm" placeholder="••••••••" autoComplete="new-password" required />
+            </Field>
+
+            <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+              <input type="checkbox" name="tos" required className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+              <span>I agree to the Terms and Privacy Policy</span>
+            </label>
+
+            <SubmitButton type="submit" loading={loading}>
+              Create account
+            </SubmitButton>
+          </form>
+        </AuthCard>
+      </div>
+
+      <div className="order-1 md:order-2">
+        <SignupAside />
+      </div>
+    </div>
+  );
+}
+
+function SignupAside() {
+  return (
+    <div className="relative mx-auto max-w-md md:max-w-none">
+      <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-sky-500/15 p-6 shadow-2xl backdrop-blur-sm dark:border-white/10">
+        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Your path, accelerated</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          Build real-world skills with curated courses, hands-on projects, and mentor support.
+        </p>
+        <div className="mt-4 grid gap-3 text-sm">
+          <div className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
+            Live cohort-based learning
+          </div>
+          <div className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
+            Peer reviews and code clinics
+          </div>
+          <div className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
+            Career-ready portfolio projects
+          </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
