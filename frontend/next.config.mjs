@@ -11,6 +11,9 @@ const nextConfig = {
   },
   env: {
     PORT: '3656'
+  },
+  experimental:{
+    browserDebugInfoInTerminal: true,
   }
 }
 
