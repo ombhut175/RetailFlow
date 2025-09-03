@@ -10,11 +10,14 @@ const nextConfig = {
     unoptimized: true,
   },
   env: {
-    PORT: '3656'
+    PORT: '3656',
+    // Explicitly include the API URL for client-side access
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
   experimental:{
     browserDebugInfoInTerminal: true,
-  }
+  },
+  typedRoutes: true,
 }
 
-export default nextConfig
+export default nextConfig;

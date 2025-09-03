@@ -87,3 +87,10 @@ temp/
 # Zencoder
 .zencoder/
 **/.zencoder/
+
+
+# VS Code
+.vscode/
+**/.vscode/
+frontend/.vscode/
+backend/.vscode/

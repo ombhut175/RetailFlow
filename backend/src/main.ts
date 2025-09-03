@@ -20,17 +20,41 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Global CORS
-  app.enableCors({
-    origin: true,
-    credentials: true,
-  });
+  const nodeEnv = process.env[ENV.NODE_ENV] ?? 'development';
+  const isProd = nodeEnv === 'production';
+  if (nodeEnv === 'development') {
+    // Allow all origins in development (echoes request origin, supports credentials)
+    app.enableCors({
+      origin: true,
+      credentials: true,
+    });
+  } else if (isProd) {
+    // Restrict to FRONTEND_URL in production
+    const frontendUrl = process.env[ENV.FRONTEND_URL];
+    if (!frontendUrl) {
+      throw new Error('FRONTEND_URL must be set when NODE_ENV=production');
+    }
+    app.enableCors({
+      origin: frontendUrl,
+      credentials: true,
+    });
+  } else {
+    // For other environments, default to FRONTEND_URL if provided, otherwise throw
+    const frontendUrl = process.env[ENV.FRONTEND_URL];
+    if (!frontendUrl) {
+      throw new Error(`FRONTEND_URL must be set when NODE_ENV=${nodeEnv}`);
+    }
+    app.enableCors({
+      origin: frontendUrl,
+      credentials: true,
+    });
+  }
 
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Swagger configuration (only in non-production environments unless explicitly disabled)
-  const isProd = process.env[ENV.NODE_ENV] === 'production';
-  const swaggerEnabled = (process.env[ENV.SWAGGER_ENABLED] ?? 'true').toString() === 'true';
+    const swaggerEnabled = (process.env[ENV.SWAGGER_ENABLED] ?? 'true').toString() === 'true';
   if (!isProd && swaggerEnabled) {
     const swaggerUser = process.env[ENV.SWAGGER_USER];
     const swaggerPassword = process.env[ENV.SWAGGER_PASSWORD];

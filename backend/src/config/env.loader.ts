@@ -22,15 +22,12 @@ export class EnvLoader {
     const envPath = path.resolve(process.cwd(), '.env');
 
     try {
-      // Priority 1: Load .env.local if it exists
+      // Priority: Prefer .env.local; if not present, use .env
       if (fs.existsSync(envLocalPath)) {
         dotenv.config({ path: envLocalPath, override: true });
         this.loadedFiles.push('.env.local');
         console.log('📁 Environment loaded from .env.local');
-      }
-
-      // Priority 2: Load .env as fallback
-      if (fs.existsSync(envPath)) {
+      } else if (fs.existsSync(envPath)) {
         dotenv.config({ path: envPath, override: true });
         this.loadedFiles.push('.env');
         console.log('📁 Environment loaded from .env');
