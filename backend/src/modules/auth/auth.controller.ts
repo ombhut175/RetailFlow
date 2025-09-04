@@ -133,14 +133,21 @@ export class AuthController {
       
       // Set never-expiring cookie with the access token
       if (result.session?.access_token) {
-        response.cookie(COOKIES.AUTH_TOKEN, result.session.access_token, {
+        const cookieOptions: any = {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
           // No maxAge or expires means the cookie never expires (session cookie that persists)
-        });
+        };
+
+        // Set domain for production if COOKIE_DOMAIN is provided
+        if (process.env.NODE_ENV === 'production' && process.env[ENV.COOKIE_DOMAIN]) {
+          cookieOptions.domain = process.env[ENV.COOKIE_DOMAIN];
+        }
+
+        response.cookie(COOKIES.AUTH_TOKEN, result.session.access_token, cookieOptions);
         
-        this.logger.log(`Auth cookie set for user: ${loginDto.email}`);
+        this.logger.log(`Auth cookie set for user: ${loginDto.email} with options:`, cookieOptions);
       }
       
       // Format response to match expected DTO structure
@@ -388,11 +395,18 @@ export class AuthController {
       this.logger.log(`Logout request for user: ${user.email} (ID: ${user.id})`);
 
       // Clear the authentication cookie
-      response.clearCookie(COOKIES.AUTH_TOKEN, {
+      const clearCookieOptions: any = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-      });
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      };
+
+      // Set domain for production if COOKIE_DOMAIN is provided
+      if (process.env.NODE_ENV === 'production' && process.env[ENV.COOKIE_DOMAIN]) {
+        clearCookieOptions.domain = process.env[ENV.COOKIE_DOMAIN];
+      }
+
+      response.clearCookie(COOKIES.AUTH_TOKEN, clearCookieOptions);
 
       const result = await this.authService.logout(user.id);
       this.logger.log(`User logged out successfully: ${user.email}`);
