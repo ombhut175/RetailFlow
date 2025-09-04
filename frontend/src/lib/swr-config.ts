@@ -4,6 +4,7 @@ import React from 'react';
 import { SWRConfig } from 'swr';
 import { DEBUG_MESSAGES } from '@/constants/messages';
 import { APP_CONFIG } from '@/constants/config';
+import hackLog from '@/lib/logger';
 
 // Global SWR configuration - NO GLOBAL FETCHER (each hook uses its own)
 export const swrConfig = {
@@ -14,19 +15,21 @@ export const swrConfig = {
   errorRetryCount: 2, // Only retry twice on error
   refreshInterval: APP_CONFIG.AUTO_REFRESH_INTERVAL, // From constants
   onError: (error: any) => {
-    console.log(`❌ [SWR Global] ${DEBUG_MESSAGES.API_REQUEST_FAILED}:`, error);
+    hackLog.error('SWR Global Error', error);
     // Don't use handleError here as it would show duplicate toasts
     // Individual hooks will handle their own errors
   },
   onSuccess: (data: any) => {
-    console.log(`🎯 [SWR Global] ${DEBUG_MESSAGES.API_REQUEST_SUCCESS}:`, 
-      typeof data === 'object' ? JSON.stringify(data).substring(0, APP_CONFIG.MAX_CONSOLE_LOG_LENGTH) + '...' : data
-    );
+    hackLog.info('SWR Global Success', {
+      dataType: typeof data,
+      isArray: Array.isArray(data),
+      preview: typeof data === 'object' ? JSON.stringify(data).substring(0, APP_CONFIG.MAX_CONSOLE_LOG_LENGTH) + '...' : data
+    });
   }
 };
 
 // SWR Provider wrapper
 export function SWRProvider({ children }: { children: React.ReactNode }) {
-  console.log(`🚀 [SWR] ${DEBUG_MESSAGES.COMPONENT_RENDERED} - Provider initialized`);
+  hackLog.componentMount('SWRProvider');
   return React.createElement(SWRConfig, { value: swrConfig }, children);
 }

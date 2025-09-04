@@ -5,6 +5,7 @@ import { swrFetcher } from '@/helpers/request' // 🚨 MUST USE helpers/request 
 import { handleError } from '@/helpers/errors' // 🚨 MUST USE helpers/errors  
 import { SUCCESS_MESSAGES, ERROR_MESSAGES, DEBUG_MESSAGES } from '@/constants/messages'
 import { useTestingStore } from '@/lib/store'
+import hackLog from '@/lib/logger'
 
 export function useTesting() {
   const { 
@@ -25,7 +26,10 @@ export function useTesting() {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
       onSuccess: (data) => {
-        console.log(`🎉 [${DEBUG_MESSAGES.API_REQUEST_SUCCESS}] Testing data loaded:`, data)
+        hackLog.info('Testing data loaded successfully', { 
+          dataType: typeof data,
+          hasStats: data && typeof data === 'object' && 'stats' in data
+        });
         setTestingData(data)
         setLastRefresh(new Date())
         setError(null)
@@ -43,7 +47,7 @@ export function useTesting() {
         }
       },
       onError: (err) => {
-        console.log(`💥 [${DEBUG_MESSAGES.API_REQUEST_FAILED}] Testing data error:`, err)
+        hackLog.error('Testing data loading failed', err);
         // 🚨 FOLLOWS RULES - Uses helpers/errors through store
         setErrorFromException(err)
       }
@@ -52,24 +56,24 @@ export function useTesting() {
 
   const refreshData = async () => {
     try {
-      console.log(`🔄 [${DEBUG_MESSAGES.HOOK_EXECUTED}] Manual refresh triggered`)
+      hackLog.info('Manual refresh triggered');
       await mutate()
-      console.log(`✅ [${DEBUG_MESSAGES.HOOK_EXECUTED}] Manual refresh completed`)
+      hackLog.info('Manual refresh completed');
     } catch (err: any) {
-      console.log(`❌ [${DEBUG_MESSAGES.HOOK_EXECUTED}] Manual refresh failed:`, err)
+      hackLog.error('Manual refresh failed', err);
       // 🚨 FOLLOWS RULES - Uses helpers/errors
       setErrorFromException(err)
     }
   }
 
   const resetData = () => {
-    console.log(`🧹 [${DEBUG_MESSAGES.HOOK_EXECUTED}] Resetting all data`)
+    hackLog.info('Resetting all data');
     clearData()
     mutate(undefined, { revalidate: false }) // Clear SWR cache
   }
 
   const addTestData = () => {
-    console.log(`🧪 [${DEBUG_MESSAGES.HOOK_EXECUTED}] Adding test data`)
+    hackLog.info('Adding test data');
     const testData = {
       timestamp: new Date().toISOString(),
       environment: 'test',

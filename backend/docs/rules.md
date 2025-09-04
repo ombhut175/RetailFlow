@@ -1,320 +1,1325 @@
-# ✅ Backend Coding Rules and Best Practices
+# 🚀 Hackathon Backend Rules: AI-First Development
+
+> **Mission**: Build fast, debug easily, ship quickly with minimal bugs
 
 ---
 
-## 🧾 1. Environment Variables 
+## 🧾 1. Environment Variables (Simplified)
 
 * **DO NOT hardcode** any credentials, URLs, or magic values.
 * Use `process.env` to access variables.
-* **Document all required variables** in `env.example` present at root of project.
-* If anything is unclear or missing, ask the maintainer (me).
+* **Document all required variables** in `env.example`.
+* **AI TIP**: Always include descriptive comments for env vars to help AI understand context.
+
+```typescript
+// ✅ GOOD: AI can understand this easily
+const supabaseUrl = process.env.SUPABASE_URL; // Main Supabase project URL
+const supabaseKey = process.env.SUPABASE_ANON_KEY; // Public anon key for client-side access
+```
 
 ---
 
-## 🧵 2. String Constants
+## 🧵 2. String Constants (AI-Optimized)
 
-* Define **all hardcoded strings** (e.g., messages, table names, error keys, Supabase policies, Environment variables names) inside a **central `string-const.ts`** file.
-* Use **categorized enums or objects** for structure.
+* Define **all hardcoded strings** in a **central `string-const.ts`** file with **descriptive names and comments**.
+* Use **clear, self-documenting names** that AI can easily understand and suggest.
+* **Include JSDoc comments** for complex constants.
 
-```ts
+```typescript
 // helpers/string-const.ts
+/**
+ * Database table names - used with Drizzle ORM
+ */
 export enum TABLES {
-  TASKS = 'tasks',
+  USERS = 'users',           // Main user accounts table
+  TASKS = 'tasks',           // User tasks/todos table
+  SKILLS = 'skills',         // User skills and competencies
 }
 
+/**
+ * User-facing error messages - keep consistent across app
+ */
 export enum MESSAGES {
   USER_NOT_FOUND = 'User not found',
   TASK_NOT_FOUND = 'Task not found',
+  INVALID_CREDENTIALS = 'Invalid email or password',
 }
 
-export enum ENV {
+/**
+ * Environment variable keys - helps prevent typos
+ */
+export enum ENV_KEYS {
   SUPABASE_URL = 'SUPABASE_URL',
   SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY',
+  JWT_SECRET = 'JWT_SECRET',
 }
 ```
 
-Use like:
-
-```ts
-supabase.from(TABLES.TASKS).select(...)
-throw new NotFoundException(MESSAGES.TASK_NOT_FOUND)
-
-```
-
-```ts
-process.env[ENV.SUPABASE_URL]
-
-```
+**AI Benefits**: 
+- AI can suggest correct constants based on context
+- Autocomplete prevents typos
+- Easy to refactor and maintain
 
 ---
 
-## 📦 3. DTOs and Validation
+## 📦 3. DTOs and Validation (Hackathon Speed)
 
-* All inputs must use `DTOs` with `class-validator` and `class-transformer`.
-* **Separate DTOs** for:
+* **Keep DTOs simple** but always validate inputs with `class-validator`.
+* **Use descriptive property names** and **JSDoc comments** for AI assistance.
+* **Standardize DTO naming**: `CreateXDto`, `UpdateXDto`, `XResponseDto`.
 
-  * `CreateXDto`
-  * `UpdateXDto`
-  * `DeleteXDto` (when using body/payload)
-* Mark optional fields using `@IsOptional()` and validate types strictly.
+```typescript
+export class CreateUserDto {
+  /**
+   * User's full name
+   * @example "John Doe"
+   */
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-Example:
+  /**
+   * Valid email address
+   * @example "john@example.com"
+   */
+  @IsEmail()
+  email: string;
 
-```ts
-export class UpdateTaskDto {
+  /**
+   * Strong password (min 8 chars)
+   * @example "SecurePass123!"
+   */
+  @IsString()
+  @MinLength(8)
+  password: string;
+}
+
+export class UpdateUserDto {
   @IsOptional()
   @IsString()
-  title?: string;
+  name?: string;
 
   @IsOptional()
-  @IsBoolean()
-  completed?: boolean;
+  @IsEmail()
+  email?: string;
 }
 ```
 
----
-
-## ♻️ 4. No Repeated Code
-
-* **DRY (Don't Repeat Yourself)**: All repeated logic must go into helper functions or services.
-* For example:
-
-  * Token extraction → helper
-  * Setting cookie → helper
-  * Supabase error formatting → helper
-  * Common DB queries → utility service
+**Hackathon Benefits**:
+- AI can auto-generate validation rules
+- Clear examples help with testing
+- Less debugging time with proper validation
 
 ---
 
-## 🌐 5. Global App Configuration
+## ♻️ 4. DRY Principle (AI-Friendly)
 
-Apply these in `main.ts`:
+* **Extract reusable logic immediately** - don't wait for the third repetition.
+* **Use descriptive function names** that explain what they do.
+* **Add JSDoc comments** for complex helpers.
 
-### ✅ Global Prefix
+```typescript
+/**
+ * Extracts JWT token from Authorization header or cookies
+ * @param request Express request object
+ * @returns JWT token string or null if not found
+ */
+export function extractTokenFromRequest(request: Request): string | null {
+  // Check Authorization header first
+  const authHeader = request.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.substring(7);
+  }
 
-```ts
-app.setGlobalPrefix('api');
+  // Fallback to cookies
+  return request.cookies?.jwt || null;
+}
+
+/**
+ * Formats Supabase error for consistent API responses
+ */
+export function formatSupabaseError(error: any): { message: string; code?: string } {
+  return {
+    message: error.message || 'Database operation failed',
+    code: error.code,
+  };
+}
 ```
 
-### ✅ Global CORS
+**AI Advantages**:
+- AI can suggest where to extract common patterns
+- Self-documenting code reduces debugging time
+- Easier to maintain and modify
 
-```ts
-app.enableCors({
-  origin: true,
-  credentials: true,
-});
-```
+---
 
-### ✅ Global Cookie Parser
+## 🌐 5. Global App Configuration (Quick Setup)
 
-```ts
+**Copy-paste ready configuration** for `main.ts`:
+
+```typescript
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-app.use(cookieParser());
+import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Quick hackathon setup - enable everything
+  app.setGlobalPrefix('api');
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+  app.use(cookieParser());
+  
+  // Global validation with helpful error messages
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,           // Strip unknown properties
+    forbidNonWhitelisted: true, // Throw error for unknown properties
+    transform: true,           // Auto-transform payloads to DTOs
+  }));
+
+  // Global error handling
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  await app.listen(3000);
+  console.log('🚀 Server running at http://localhost:3000/api');
+}
+bootstrap();
 ```
+
+**Hackathon Benefits**: One-time setup, works out of the box
 
 ---
 
-## 🚨 6. Global Exception Filters
+## 🚨 6. Smart Error Handling (Debug-Friendly)
 
-* Use NestJS **`HttpExceptionFilter`** to catch and format all errors.
-* Customize to return:
+* **Always include context** in error messages for easier debugging.
+* **Use structured error responses** with helpful details.
+* **Log errors with enough context** for quick troubleshooting.
 
-  * `statusCode`
-  * `message`
-  * `timestamp`
-  * `path`
+```typescript
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, Logger } from '@nestjs/common';
+import { Request, Response } from 'express';
 
-Apply globally in `main.ts`:
-
-```ts
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-app.useGlobalFilters(new HttpExceptionFilter());
-```
-
-Filter example:
-
-```ts
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger('HttpExceptionFilter');
+
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-
     const status = exception.getStatus();
-    const message = exception.message || 'Unexpected error occurred';
 
-    response.status(status).json({
+    // Enhanced error context for debugging
+    const errorResponse = {
       statusCode: status,
-      message,
       timestamp: new Date().toISOString(),
       path: request.url,
-    });
+      method: request.method,
+      message: exception.message,
+      // Add helpful debugging info in development
+      ...(process.env.NODE_ENV === 'development' && {
+        stack: exception.stack,
+        cause: exception.cause,
+      }),
+    };
+
+    // Log error with context for easier debugging
+    this.logger.error(
+      `${request.method} ${request.url} - ${status} - ${exception.message}`,
+      exception.stack
+    );
+
+    response.status(status).json(errorResponse);
   }
 }
 ```
 
----
-
-## 🛠 7. Helper Functions
-
-* All utility logic (e.g. parsing cookies, verifying tokens, formatting DB errors) should be placed in:
-
-  * `helpers/` or `utils/` folder.
-* Write **pure and reusable** functions, e.g.:
-
-  * `parseCookies()`
-  * `verifySupabaseToken()`
-  * `getUserFromRequest()`
-  * `formatSupabaseError()`
+**Hackathon Benefits**: 
+- Immediate error context
+- Stack traces in development
+- Easy debugging with structured logs
 
 ---
 
-## 📌 8. Task-Specific Guidelines
+## 🛠 7. Smart Helper Functions (AI-Generated)
 
-### 🔐 Auth:
+* **Let AI generate utility functions** - describe what you need, AI writes the code.
+* **Use TypeScript generics** for reusable helpers.
+* **Include usage examples** in JSDoc for AI context.
 
-* JWT is set as HTTP-only cookie.
-* Extract token from cookies on protected routes.
-* Validate Supabase session from token before any data access.
+```typescript
+/**
+ * Generic function to find entity by ID or throw not found error
+ * @example const user = await findOrThrow(userRepo.findById(id), 'User not found');
+ */
+export async function findOrThrow<T>(
+  queryPromise: Promise<T | null | undefined>,
+  errorMessage = 'Resource not found'
+): Promise<T> {
+  const result = await queryPromise;
+  if (!result) {
+    throw new NotFoundException(errorMessage);
+  }
+  return result;
+}
+
+/**
+ * Extract Supabase token from Authorization header
+ * @param request Express request object
+ * @returns Bearer token string or null if not found
+ */
+export function extractTokenFromRequest(request: Request): string | null {
+  const authHeader = request.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.substring(7);
+  }
+  return null;
+}
+
+/**
+ * Safe async wrapper that logs errors and returns null on failure
+ * @example const result = await safeAsync(() => riskyOperation(), 'Operation failed');
+ */
+export async function safeAsync<T>(
+  operation: () => Promise<T>,
+  logMessage?: string
+): Promise<T | null> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (logMessage) {
+      console.error(`${logMessage}:`, error.message);
+    }
+    return null;
+  }
+}
+
+/**
+ * Generate correlation ID for request tracing
+ */
+export function generateCorrelationId(): string {
+  return crypto.randomUUID();
+}
+```
+
+**AI Advantages**:
+- AI can generate complex utility functions quickly
+- Type-safe generics prevent runtime errors
+- Examples help AI understand usage patterns
+
+---
+
+## 📌 8. Authentication (Supabase Auth)
+
+**Use Supabase Auth for all authentication - no manual JWT needed:**
+
+```typescript
+// auth.service.ts
+@Injectable()
+export class AuthService {
+  constructor(private readonly supabaseService: SupabaseService) {}
+
+  /**
+   * Login user using Supabase Auth
+   */
+  async login(loginDto: LoginDto): Promise<{ user: any; session: any }> {
+    this.logger.log('User login attempt', {
+      operation: 'login',
+      email: loginDto.email,
+      timestamp: new Date().toISOString(),
+    });
+
+    const { data, error } = await this.supabaseService.getClient()
+      .auth.signInWithPassword({
+        email: loginDto.email,
+        password: loginDto.password,
+      });
+
+    if (error) {
+      this.logger.error('Login failed', {
+        operation: 'login',
+        email: loginDto.email,
+        error: error.message,
+      });
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    this.logger.log('Login successful', {
+      operation: 'login',
+      userId: data.user.id,
+      email: data.user.email,
+    });
+
+    return { user: data.user, session: data.session };
+  }
+
+  /**
+   * Register user using Supabase Auth
+   */
+  async signup(signupDto: SignupDto): Promise<{ user: any; session: any }> {
+    this.logger.log('User signup attempt', {
+      operation: 'signup',
+      email: signupDto.email,
+      timestamp: new Date().toISOString(),
+    });
+
+    const { data, error } = await this.supabaseService.getClient()
+      .auth.signUp({
+        email: signupDto.email,
+        password: signupDto.password,
+        options: {
+          data: {
+            name: signupDto.name,
+          },
+        },
+      });
+
+    if (error) {
+      this.logger.error('Signup failed', {
+        operation: 'signup',
+        email: signupDto.email,
+        error: error.message,
+      });
+      throw new BadRequestException(error.message);
+    }
+
+    this.logger.log('Signup successful', {
+      operation: 'signup',
+      userId: data.user?.id,
+      email: data.user?.email,
+      needsConfirmation: !data.session,
+    });
+
+    return { user: data.user, session: data.session };
+  }
+
+  /**
+   * Get user from Supabase token
+   */
+  async getUserFromToken(token: string): Promise<any> {
+    const { data, error } = await this.supabaseService.getClient()
+      .auth.getUser(token);
+
+    if (error || !data.user) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    return data.user;
+  }
+
+  /**
+   * Logout user
+   */
+  async logout(): Promise<void> {
+    await this.supabaseService.getClient().auth.signOut();
+  }
+}
+```
+
+**Auth Guard for protecting routes:**
+```typescript
+@Injectable()
+export class JwtAuthGuard implements CanActivate {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
+  constructor(private readonly authService: AuthService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    
+    // Extract token from Authorization header
+    const authHeader = request.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      this.logger.warn('No authorization header found');
+      throw new UnauthorizedException('No token provided');
+    }
+
+    const token = authHeader.substring(7);
+    
+    try {
+      const user = await this.authService.getUserFromToken(token);
+      request.user = user;
+      
+      this.logger.debug('User authenticated', {
+        userId: user.id,
+        email: user.email,
+      });
+      
+      return true;
+    } catch (error) {
+      this.logger.error('Authentication failed', {
+        error: error.message,
+      });
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+}
+```
+
+**Hackathon Benefits**:
+- No JWT setup needed - Supabase handles everything
+- Built-in user management
+- Email verification and password reset
+- Session management included
 
 
 
-## 📘 9. Swagger API Documentation
+## 📘 9. Auto-Generated API Documentation
 
-* **All new controller functions must be documented** using Swagger decorators.
+* **Let AI write your Swagger docs** - provide examples and AI generates decorators.
+* **Use OpenAPI examples** for better testing and client generation.
 
-* Use appropriate decorators like:
+```typescript
+@Controller('users')
+@ApiTags('Users')
+export class UsersController {
 
-  ```ts
-  @ApiTags('users')
-  @ApiOperation({ summary: 'Get user by ID' })
-  @ApiResponse({ status: 200, description: 'User found' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  ```
+  @Post()
+  @ApiOperation({ 
+    summary: 'Create new user',
+    description: 'Creates a new user account with email and password'
+  })
+  @ApiResponse({ 
+    status: 201,
+    description: 'User created successfully',
+    example: {
+      statusCode: 201,
+      success: true,
+      message: 'User created successfully',
+      data: {
+        id: 'uuid-here',
+        name: 'John Doe',
+        email: 'john@example.com',
+        createdAt: '2024-01-01T00:00:00Z'
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Validation failed',
+    example: {
+      statusCode: 400,
+      message: ['email must be a valid email'],
+      timestamp: '2024-01-01T00:00:00Z',
+      path: '/api/users'
+    }
+  })
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+}
+```
 
-* Ensure DTOs are also annotated with:
-
-  ```ts
-  @ApiProperty({ example: 'John Doe' })
-  ```
-
-* Keep Swagger annotations **up-to-date** as APIs evolve.
+**AI Tip**: Describe your endpoint to AI like "Create a POST endpoint for user registration that validates email and password, returns user data on success" - AI will generate the full controller with Swagger docs.
 
 
 
-## 🚀 10. Standardized API Responses
+## 🚀 10. Consistent API Responses (Copy-Paste Ready)
 
-* All responses (success or error) should follow a **consistent format**.
-* Create a common `ApiResponseHelper` in `helpers/`:
-
-```ts
+```typescript
 // helpers/api-response.helper.ts
-export const successResponse = (data: any, message = 'Success') => ({
+
+export interface ApiResponse<T = any> {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data?: T;
+  meta?: {
+    total?: number;
+    page?: number;
+    limit?: number;
+  };
+}
+
+/**
+ * Standard success response wrapper
+ */
+export const successResponse = <T>(
+  data: T, 
+  message = 'Operation successful'
+): ApiResponse<T> => ({
   statusCode: 200,
   success: true,
   message,
   data,
 });
 
-export const createdResponse = (data: any, message = 'Created') => ({
+/**
+ * Created response for POST endpoints
+ */
+export const createdResponse = <T>(
+  data: T, 
+  message = 'Resource created successfully'
+): ApiResponse<T> => ({
   statusCode: 201,
   success: true,
   message,
   data,
 });
-```
 
-Usage in controller:
+/**
+ * Paginated response helper
+ */
+export const paginatedResponse = <T>(
+  data: T[], 
+  total: number, 
+  page: number, 
+  limit: number,
+  message = 'Data retrieved successfully'
+): ApiResponse<T[]> => ({
+  statusCode: 200,
+  success: true,
+  message,
+  data,
+  meta: { total, page, limit },
+});
 
-```ts
+// Usage in controllers:
 @Get()
-async getAll() {
-  const users = await this.userService.findAll();
+async getAllUsers() {
+  const users = await this.usersService.findAll();
   return successResponse(users, 'Users fetched successfully');
 }
 ```
 
----
-
-## ❌ 11. Avoid Manual Status Codes in Controllers
-
-* Do **not** manually set status codes with `@Res()` and `res.status()`.
-* Let NestJS handle response codes using decorators:
-
-```ts
-@Post()
-@HttpCode(HttpStatus.CREATED) // or use built-in decorators like @Post() + return 201
-```
+**Hackathon Benefits**: Consistent API responses across all endpoints
 
 ---
 
-## 🧼 12. Clean Controller Structure
+## ❌ 11. Keep Controllers Simple (AI-Friendly)
 
-* Controllers should be **thin** – delegate all logic to services.
-* Only do request validation and response formatting in controllers.
+* **Thin controllers** - just route, validate, delegate, respond.
+* **Use dependency injection** properly for testability.
+* **Let AI generate boilerplate** controller code.
 
-```ts
+```typescript
 @Controller('users')
-export class UserController {
-  constructor(private readonly userService: UserService) {}
+@ApiTags('Users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  async getAllUsers() {
-    return successResponse(await this.userService.getAllUsers());
+  async findAll() {
+    const users = await this.usersService.findAll();
+    return successResponse(users, 'Users retrieved successfully');
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const user = await this.usersService.findOne(id);
+    return successResponse(user, 'User found');
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createUserDto: CreateUserDto) {
+    const user = await this.usersService.create(createUserDto);
+    return createdResponse(user, 'User created successfully');
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+    const user = await this.usersService.update(id, updateUserDto);
+    return successResponse(user, 'User updated successfully');
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.usersService.remove(id);
   }
 }
 ```
 
+**AI Tip**: Tell AI "Generate a CRUD controller for User entity" and it will create the entire controller with proper validation and responses.
+
 ---
 
-## 🧪 13. Service Design Patterns
+## 🧪 12. Smart Service Design (AI-Assisted)
 
-* Services should be **modular** and reusable.
-* For domain logic, prefer smaller private helper methods inside services.
+* **Let AI generate service methods** based on business requirements.
+* **Use descriptive method names** that explain business logic.
+* **Include error handling** in all service methods.
 
-```ts
+```typescript
 @Injectable()
-export class UserService {
-  async getAllUsers() {
-    return this.userRepository.findAll();
+export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
+  constructor(private readonly usersRepo: UsersRepository) {}
+
+  /**
+   * Get all users with optional filtering
+   */
+  async findAll(filters?: { role?: string; active?: boolean }): Promise<User[]> {
+    this.logger.log('Fetching all users', { filters });
+    
+    try {
+      return await this.usersRepo.findAll(filters);
+    } catch (error) {
+      this.logger.error('Failed to fetch users', error.stack);
+      throw new InternalServerErrorException('Could not fetch users');
+    }
   }
 
-  private sanitizeUser(user: UserEntity) {
-    delete user.password;
-    return user;
+  /**
+   * Get user by ID or throw not found error
+   */
+  async findOne(id: string): Promise<User> {
+    this.logger.log(`Fetching user by ID: ${id}`);
+    
+    const user = await this.usersRepo.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    
+    return this.sanitizeUser(user);
+  }
+
+  /**
+   * Create new user with validation
+   */
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    this.logger.log('Creating new user', { email: createUserDto.email });
+    
+    // Check if user already exists
+    const existingUser = await this.usersRepo.findByEmail(createUserDto.email);
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+    
+    // Hash password
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 12);
+    
+    const newUser = await this.usersRepo.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
+    
+    return this.sanitizeUser(newUser);
+  }
+
+  /**
+   * Remove sensitive data from user object
+   */
+  private sanitizeUser(user: User): User {
+    const { password, ...sanitized } = user;
+    return sanitized as User;
   }
 }
 ```
 
+**AI Benefits**: AI can generate comprehensive CRUD methods with proper error handling and logging.
+
 ---
 
-## 🔁 14. Reusable Database Functions
+## 🔁 13. Quick Repository Pattern (AI-Generated)
 
-* Abstract common DB operations (e.g., find by ID with not found check) into **BaseService** or utility functions.
+* **Use AI to generate repository methods** based on your database schema.
+* **Keep repositories focused** on data access only.
+* **Use generic base repository** for common operations.
 
-```ts
-export async function findOrThrow<T>(
-  query: Promise<T>,
-  message = 'Resource not found',
-) {
-  const result = await query;
-  if (!result) throw new NotFoundException(message);
-  return result;
+```typescript
+// Base repository with common CRUD operations
+export abstract class BaseRepository<T> {
+  constructor(protected readonly db: DrizzleService) {}
+
+  /**
+   * Find entity by ID with proper error handling
+   */
+  async findByIdOrThrow(id: string, tableName: string): Promise<T> {
+    const result = await this.findById(id);
+    if (!result) {
+      throw new NotFoundException(`${tableName} with ID ${id} not found`);
+    }
+    return result;
+  }
+
+  abstract findById(id: string): Promise<T | null>;
+  abstract create(data: Partial<T>): Promise<T>;
+  abstract update(id: string, data: Partial<T>): Promise<T>;
+  abstract delete(id: string): Promise<void>;
+}
+
+// Specific repository implementation
+@Injectable()
+export class UsersRepository extends BaseRepository<User> {
+  
+  async findById(id: string): Promise<User | null> {
+    const [user] = await this.db.db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, id))
+      .limit(1);
+    
+    return user || null;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const [user] = await this.db.db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
+    
+    return user || null;
+  }
+
+  async create(userData: CreateUserData): Promise<User> {
+    const [newUser] = await this.db.db
+      .insert(usersTable)
+      .values({
+        id: crypto.randomUUID(),
+        ...userData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    
+    return newUser;
+  }
+
+  async update(id: string, userData: Partial<User>): Promise<User> {
+    const [updatedUser] = await this.db.db
+      .update(usersTable)
+      .set({ ...userData, updatedAt: new Date() })
+      .where(eq(usersTable.id, id))
+      .returning();
+    
+    if (!updatedUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    
+    return updatedUser;
+  }
+
+  async delete(id: string): Promise<void> {
+    const result = await this.db.db
+      .delete(usersTable)
+      .where(eq(usersTable.id, id));
+    
+    if (result.changes === 0) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+  }
 }
 ```
 
+**AI Tip**: Describe your data model to AI and it will generate complete repository methods with proper error handling.
+
 ---
 
-## 💥 15. Error Handling Enhancements
+## 🤖 15. AI-First Development Rules
 
-* Always throw specific exceptions (e.g., `BadRequestException`, `ForbiddenException`) rather than generic `Error`.
+### **Prompt Engineering for Code Generation**
+* **Be specific** in your requests to AI
+* **Include context** about your existing codebase
+* **Ask for complete implementations** with error handling
 
-Example:
+```
+❌ BAD: "Create a user service"
 
-```ts
-if (!user) {
-  throw new NotFoundException(MESSAGES.USER_NOT_FOUND);
+✅ GOOD: "Create a UserService class that uses UsersRepository for CRUD operations, includes password hashing with bcrypt, proper error handling with specific exceptions, logging with NestJS Logger, and follows our response format from api-response.helper.ts"
+```
+
+### **AI Code Review Checklist**
+Before using AI-generated code, verify:
+- [ ] **Error handling** is included
+- [ ] **Input validation** with DTOs
+- [ ] **Logging** statements for debugging
+- [ ] **Type safety** with proper TypeScript types
+- [ ] **Consistent naming** with existing codebase
+- [ ] **JSDoc comments** for complex logic
+
+### **AI-Assisted Debugging**
+* **Copy full error messages** to AI for analysis
+* **Include surrounding context** (5-10 lines before/after error)
+* **Ask AI to explain** the error and provide fixes
+* **Use AI to generate** test cases for debugging
+
+---
+
+## 🐛 16. Easy Debugging Rules
+
+### **Detailed Logging Strategy**
+**Always log with rich context for easy debugging:**
+
+```typescript
+// ✅ GOOD: Detailed logging with objects and arrays
+this.logger.log('User creation started', {
+  email: createUserDto.email,
+  userData: createUserDto, // Include full object for context
+  timestamp: new Date().toISOString(),
+  requestId: request.id,
+});
+
+this.logger.log('Processing user tasks', {
+  userId: user.id,
+  tasksCount: tasks.length,
+  // For arrays, log first 2 objects for context without overwhelming logs
+  tasksSample: tasks.slice(0, 2),
+  operation: 'batch_update',
+  requestId: request.id,
+});
+
+this.logger.error('User creation failed', {
+  error: {
+    message: error.message,
+    code: error.code,
+    stack: error.stack,
+  },
+  input: createUserDto, // Full input object for debugging
+  context: {
+    timestamp: new Date().toISOString(),
+    requestId: request.id,
+    userId: user?.id,
+  },
+});
+
+// For database operations - log queries with parameters
+this.logger.debug('Database query executed', {
+  operation: 'findUsersByRole',
+  parameters: { role: 'admin', active: true },
+  resultCount: users.length,
+  // For result arrays, show first 2 items
+  resultsSample: users.slice(0, 2).map(u => ({ id: u.id, email: u.email })),
+  executionTime: `${Date.now() - startTime}ms`,
+});
+```
+
+### **Logging Rules for Objects and Arrays**
+
+**For Objects:**
+```typescript
+// ✅ Always include full object context
+this.logger.log('Processing payment', {
+  paymentData: paymentDto, // Full object
+  user: { id: user.id, email: user.email }, // User object
+  metadata: request.metadata,
+});
+```
+
+**For Arrays:**
+```typescript
+// ✅ Log array length + first 2 items for context
+this.logger.log('Bulk operation completed', {
+  operation: 'createUsers',
+  totalItems: users.length,
+  itemsSample: users.slice(0, 2), // First 2 items only
+  processingTime: `${executionTime}ms`,
+});
+
+// For large datasets, log summary stats
+this.logger.log('Processing large dataset', {
+  operation: 'dataAnalysis',
+  totalRecords: records.length,
+  sampleData: records.slice(0, 2),
+  summary: {
+    averageValue: records.reduce((a, b) => a + b.value, 0) / records.length,
+    minValue: Math.min(...records.map(r => r.value)),
+    maxValue: Math.max(...records.map(r => r.value)),
+  },
+});
+```
+
+### **Error Context**
+Always include enough context in errors:
+```typescript
+❌ BAD: throw new NotFoundException('Not found');
+
+✅ GOOD: throw new NotFoundException(`User with email ${email} not found`);
+
+✅ BETTER: throw new NotFoundException({
+  message: `User with email ${email} not found`,
+  context: { email, searchedAt: new Date(), requestId },
+});
+```
+
+### **Logging Scenarios & Best Practices**
+
+**1. API Request/Response Logging:**
+```typescript
+@Controller('users')
+export class UsersController {
+  private readonly logger = new Logger(UsersController.name);
+
+  @Post()
+  async create(@Body() createUserDto: CreateUserDto, @Req() request: Request) {
+    const requestId = crypto.randomUUID();
+    
+    // Log incoming request with full context
+    this.logger.log('API request received', {
+      endpoint: 'POST /api/users',
+      requestId,
+      body: createUserDto,
+      headers: {
+        userAgent: request.headers['user-agent'],
+        contentType: request.headers['content-type'],
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      const result = await this.usersService.create(createUserDto);
+      
+      // Log successful response
+      this.logger.log('API request completed successfully', {
+        endpoint: 'POST /api/users',
+        requestId,
+        responseData: { id: result.id, email: result.email },
+        statusCode: 201,
+      });
+
+      return createdResponse(result);
+    } catch (error) {
+      // Log error with full context
+      this.logger.error('API request failed', {
+        endpoint: 'POST /api/users',
+        requestId,
+        input: createUserDto,
+        error: {
+          message: error.message,
+          stack: error.stack,
+          statusCode: error.status || 500,
+        },
+      });
+      
+      throw error;
+    }
+  }
+}
+```
+
+**2. Database Operations Logging:**
+```typescript
+@Injectable()
+export class UsersRepository {
+  private readonly logger = new Logger(UsersRepository.name);
+
+  async findByFilters(filters: any): Promise<User[]> {
+    this.logger.debug('Database query starting', {
+      operation: 'findByFilters',
+      table: 'users',
+      filters,
+      timestamp: new Date().toISOString(),
+    });
+
+    const startTime = Date.now();
+    
+    try {
+      const query = this.db.db
+        .select()
+        .from(usersTable)
+        .where(this.buildWhereClause(filters));
+
+      const results = await query;
+      
+      this.logger.debug('Database query completed', {
+        operation: 'findByFilters',
+        table: 'users',
+        filters,
+        resultCount: results.length,
+        // Log first 2 results
+        resultsSample: results.slice(0, 2),
+        executionTime: `${Date.now() - startTime}ms`,
+      });
+
+      return results;
+    } catch (error) {
+      this.logger.error('Database query failed', {
+        operation: 'findByFilters',
+        table: 'users',
+        filters,
+        error: {
+          message: error.message,
+          code: error.code,
+        },
+        executionTime: `${Date.now() - startTime}ms`,
+      });
+      
+      throw error;
+    }
+  }
+}
+```
+
+**3. Business Logic Logging:**
+```typescript
+@Injectable()
+export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+
+  async processOrder(orderData: CreateOrderDto, items: OrderItem[]): Promise<Order> {
+    const correlationId = crypto.randomUUID();
+    
+    this.logger.log('Order processing started', {
+      operation: 'processOrder',
+      correlationId,
+      orderData: orderData,
+      itemsCount: items.length,
+      // Show first 2 items for context
+      itemsSample: items.slice(0, 2),
+      totalAmount: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+    });
+
+    try {
+      // Step 1: Validate inventory
+      this.logger.debug('Validating inventory', {
+        operation: 'validateInventory',
+        correlationId,
+        itemsToCheck: items.length,
+      });
+
+      await this.validateInventory(items);
+
+      // Step 2: Calculate totals
+      const totals = this.calculateTotals(items);
+      this.logger.debug('Order totals calculated', {
+        operation: 'calculateTotals',
+        correlationId,
+        totals,
+      });
+
+      // Step 3: Create order
+      const order = await this.createOrder({
+        ...orderData,
+        items,
+        totals,
+      });
+
+      this.logger.log('Order processed successfully', {
+        operation: 'processOrder',
+        correlationId,
+        orderId: order.id,
+        totalAmount: totals.total,
+        itemsCount: items.length,
+        processingTime: `${Date.now() - startTime}ms`,
+      });
+
+      return order;
+    } catch (error) {
+      this.logger.error('Order processing failed', {
+        operation: 'processOrder',
+        correlationId,
+        orderData: orderData,
+        itemsCount: items.length,
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+      });
+      
+      throw error;
+    }
+  }
+}
+```
+
+### **Logging Checklist for AI Code Generation**
+✅ **Always include operation name and timestamp**  
+✅ **Use correlation/request IDs for tracing**  
+✅ **Log full objects for complete context**  
+✅ **For arrays: log count + first 2 items using `.slice(0, 2)`**  
+✅ **Include execution time for performance monitoring**  
+✅ **Log both success and failure scenarios**  
+✅ **Use appropriate log levels (debug, log, warn, error)**
+
+---
+
+## 🚀 17. Productivity Boosters
+
+### **Copy-Paste Templates**
+Keep these templates ready for rapid development:
+
+**Basic CRUD Controller Template:**
+```typescript
+@Controller('RESOURCE_NAME')
+@ApiTags('RESOURCE_NAME')
+export class RESOURCE_NAMEController {
+  constructor(private readonly service: RESOURCE_NAMEService) {}
+
+  @Get()
+  async findAll() {
+    const data = await this.service.findAll();
+    return successResponse(data);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.findOne(id);
+    return successResponse(data);
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createDto: CreateRESOURCE_NAMEDto) {
+    const data = await this.service.create(createDto);
+    return createdResponse(data);
+  }
+
+  // Add PUT and DELETE as needed
+}
+```
+
+**Enhanced Service Template with Detailed Logging:**
+```typescript
+@Injectable()
+export class RESOURCE_NAMEService {
+  private readonly logger = new Logger(RESOURCE_NAMEService.name);
+
+  constructor(private readonly repo: RESOURCE_NAMERepository) {}
+
+  async findAll(filters?: any): Promise<RESOURCE_TYPE[]> {
+    this.logger.log('Fetching all RESOURCE_NAME', {
+      operation: 'findAll',
+      filters: filters || {},
+      timestamp: new Date().toISOString(),
+    });
+
+    const startTime = Date.now();
+    const results = await this.repo.findAll(filters);
+    
+    this.logger.log('FindAll operation completed', {
+      operation: 'findAll',
+      filters,
+      resultCount: results.length,
+      // Show first 2 results for context
+      resultsSample: results.slice(0, 2),
+      executionTime: `${Date.now() - startTime}ms`,
+    });
+
+    return results;
+  }
+
+  async findOne(id: string): Promise<RESOURCE_TYPE> {
+    this.logger.log('Fetching RESOURCE_NAME by ID', {
+      operation: 'findOne',
+      id,
+      timestamp: new Date().toISOString(),
+    });
+
+    const item = await this.repo.findById(id);
+    if (!item) {
+      this.logger.warn('RESOURCE_NAME not found', {
+        operation: 'findOne',
+        id,
+        result: 'not_found',
+      });
+      throw new NotFoundException(`RESOURCE_NAME with ID ${id} not found`);
+    }
+
+    this.logger.log('RESOURCE_NAME found successfully', {
+      operation: 'findOne',
+      id,
+      result: { id: item.id },
+    });
+
+    return item;
+  }
+
+  async create(createDto: CreateRESOURCE_NAMEDto): Promise<RESOURCE_TYPE> {
+    this.logger.log('Creating new RESOURCE_NAME', {
+      operation: 'create',
+      input: createDto,
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      const startTime = Date.now();
+      const newItem = await this.repo.create(createDto);
+      
+      this.logger.log('RESOURCE_NAME created successfully', {
+        operation: 'create',
+        result: { id: newItem.id },
+        input: createDto,
+        executionTime: `${Date.now() - startTime}ms`,
+      });
+
+      return newItem;
+    } catch (error) {
+      this.logger.error('RESOURCE_NAME creation failed', {
+        operation: 'create',
+        input: createDto,
+        error: {
+          message: error.message,
+          code: error.code,
+          stack: error.stack,
+        },
+        timestamp: new Date().toISOString(),
+      });
+      
+      throw error;
+    }
+  }
+
+  async bulkCreate(items: CreateRESOURCE_NAMEDto[]): Promise<RESOURCE_TYPE[]> {
+    this.logger.log('Starting bulk create operation', {
+      operation: 'bulkCreate',
+      itemCount: items.length,
+      // Log first 2 items for context
+      itemsSample: items.slice(0, 2),
+      timestamp: new Date().toISOString(),
+    });
+
+    try {
+      const startTime = Date.now();
+      const results = await this.repo.bulkCreate(items);
+      
+      this.logger.log('Bulk create completed successfully', {
+        operation: 'bulkCreate',
+        inputCount: items.length,
+        resultCount: results.length,
+        resultsSample: results.slice(0, 2),
+        executionTime: `${Date.now() - startTime}ms`,
+      });
+
+      return results;
+    } catch (error) {
+      this.logger.error('Bulk create operation failed', {
+        operation: 'bulkCreate',
+        inputCount: items.length,
+        itemsSample: items.slice(0, 2),
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+      });
+      
+      throw error;
+    }
+  }
+}
+```
+
+### **VS Code Snippets**
+Create custom snippets for common patterns:
+```json
+{
+  "NestJS Controller": {
+    "prefix": "nest-controller",
+    "body": [
+      "@Controller('$1')",
+      "@ApiTags('$1')",
+      "export class $2Controller {",
+      "  constructor(private readonly $3Service: $2Service) {}",
+      "",
+      "  @Get()",
+      "  async findAll() {",
+      "    const data = await this.$3Service.findAll();",
+      "    return successResponse(data);",
+      "  }",
+      "}"
+    ]
+  }
 }
 ```
 
@@ -382,51 +1387,56 @@ export class UsersService {
 
 ---
 
-## 🧹📁 17.  Folder Structure & Organization
+## 🧹📁 14. Hackathon Folder Structure (AI-Optimized)
 
 ```
 /src
-  /modules
+  /modules              # Feature modules (AI can generate entire modules)
     /auth
       auth.controller.ts
       auth.service.ts
       auth.module.ts
-      dto/
+      /dto
+        login.dto.ts
+        signup.dto.ts
     /users
     /tasks
     ...
-  /common
-    /decorators
-    /filters
-    /guards
-    /interceptors
-    /pipes
-    /helpers
+  /common               # Shared utilities (AI-generated helpers)
     /constants
-  /config
-    supabase.config.ts
-    app.config.ts
-  /core
+      string-const.ts   # All constants with AI-friendly names
+    /filters
+      http-exception.filter.ts
+    /guards
+      jwt-auth.guard.ts
+    /helpers
+      api-response.helper.ts
+      validation.helper.ts
+    /decorators
+      current-user.decorator.ts
+  /core                 # System-level services
     /database
-    /logger
-    base.service.ts
-  main.ts
-  app.module.ts
+      database.module.ts
+      /repositories
+        base.repository.ts
+        users.repository.ts
+    /config
+      env.validation.ts
+  main.ts               # Bootstrap with all global setup
+  app.module.ts         # Root module configuration
 ```
 
-### 🔹 Breakdown
+**Hackathon Benefits**:
+- **AI can generate entire modules** at once
+- **Clear separation** makes debugging easier
+- **Consistent naming** helps AI understand context
+- **Modular structure** allows parallel development
 
-* `modules/` → Feature-based modules are grouped here.
-* `common/` → Cross-cutting concerns (used by many modules).
-* `core/` → System-level services (DB, logging, etc.)
-* `config/` → All configuration logic (e.g., `ConfigModule.forRoot()` schema files).
-
-* Use **modular grouping** under `/src/modules/` for scalability.
-* All shared logic (pipes, filters, decorators, guards, helpers, etc.) should live in `/src/common/`.
-* Use `/src/core/` for system-level bootstrapping code like database, base service, logger, etc.
-* Keep configurations in `/src/config/`.
-
-**Avoid a flat structure** when you have 50+ modules.
+**AI Development Tips**:
+1. Tell AI: "Generate a complete Users module with CRUD operations"
+2. AI will create controller, service, DTOs, and tests
+3. Copy-paste into the right folders
+4. Minimal configuration needed
 
 ---
 
@@ -735,3 +1745,68 @@ export class UserService {
   - Validate DTOs and document enqueue endpoints with Swagger.
 
 ---
+
+## 🔧 20. Environment Configuration (Copy-Paste Ready)
+
+```env
+# Database
+DATABASE_URL="your-database-url"
+
+# Supabase Configuration (handles all auth)
+SUPABASE_URL="your-supabase-url"
+SUPABASE_ANON_KEY="your-supabase-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+
+# Development
+NODE_ENV=development
+LOG_LEVEL=debug
+PORT=3000
+
+# CORS (for frontend)
+CORS_ORIGIN=http://localhost:3000,http://localhost:3001
+```
+
+---
+
+## 🚨 18. Quick Error Resolution
+
+### **Debug Checklist**
+When something breaks:
+1. **Check the logs** - errors usually have clear messages
+2. **Verify environment variables** - missing vars cause mysterious errors
+3. **Test API endpoints** - use Swagger docs or Postman
+4. **Check database connection** - verify your DATABASE_URL
+5. **Ask AI** - paste the error message and get instant help
+
+---
+
+## ⚡ 19. Development Workflow
+
+1. **Describe feature to AI** → Get complete implementation
+2. **Copy-paste code** → Into appropriate files  
+3. **Test endpoint** → Using Swagger docs
+4. **Debug if needed** → Check logs and ask AI to fix errors
+5. **Move to next feature** → Repeat process
+
+**Result**: Build complete backend in hours, not days! 🚀
+
+---
+
+## 🎯 Summary: Essential Rules for AI
+
+### **Core Principles**
+- **Use Supabase Auth** for authentication (no manual JWT setup needed)
+- **Use Drizzle ORM** for all database operations
+- **Log everything** with full objects and arrays (first 2 items)
+- **Include execution time** in all operations
+- **Use correlation IDs** for request tracing
+- **Always validate inputs** with DTOs
+- **Consistent API responses** with success/error format
+
+### **AI Code Generation Focus**
+- Generate complete CRUD operations
+- Use Supabase Auth for user management
+- Include proper error handling and logging
+- Follow consistent naming patterns
+- Use TypeScript types throughout
+- Apply validation decorators on DTOs

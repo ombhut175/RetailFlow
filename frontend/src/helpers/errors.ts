@@ -4,6 +4,7 @@
 
 import { ERROR_MESSAGES, DEBUG_MESSAGES } from '@/constants/messages';
 import { toast } from 'sonner'; // Using sonner for toast notifications
+import hackLog from '@/lib/logger';
 
 // Error handling options
 interface ErrorHandlingOptions {
@@ -16,7 +17,7 @@ interface ErrorHandlingOptions {
 // Extract meaningful error message from any error type
 export function extractErrorMessage(error: unknown, fallback?: string): string {
   const defaultFallback = fallback || ERROR_MESSAGES.SOMETHING_WENT_WRONG;
-  console.log(`🔍 [${DEBUG_MESSAGES.API_REQUEST_FAILED}] Extracting error message:`, error);
+  hackLog.error('Extracting error message', { error, fallback });
 
   // Network/Fetch API errors
   if (error instanceof TypeError && error.message.includes('fetch')) {
@@ -92,7 +93,7 @@ export function handleError(error: unknown, options: ErrorHandlingOptions = {}) 
 
   // Console logging
   if (logToConsole && !suppressConsoleError) {
-    console.error(`❌ [Error Handler]`, {
+    hackLog.error('Error handler called', {
       message,
       originalError: error,
       stack: error instanceof Error ? error.stack : undefined,

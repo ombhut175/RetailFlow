@@ -66,3 +66,30 @@ export const DEBUG_MESSAGES = {
   HOOK_EXECUTED: '🪝 Hook executed',
   STORE_ACTION: '🏪 Store action dispatched',
 } as const;
+
+// Logging Messages (for Nexlog integration)
+export const LOG_MESSAGES = {
+  // Logger initialization
+  LOGGER_INITIALIZED: 'Nexlog logger initialized',
+  LOGGER_CONFIG_LOADED: 'Logger configuration loaded',
+  
+  // Development logging
+  DEV_MODE_ENABLED: 'Development mode logging enabled',
+  PROD_MODE_ENABLED: 'Production mode logging enabled',
+  
+  // Performance logging
+  PERFORMANCE_TRACKING_START: 'Performance tracking started',
+  PERFORMANCE_TRACKING_END: 'Performance tracking completed',
+  
+  // Feature logging
+  FEATURE_FLAG_TOGGLED: 'Feature flag toggled',
+  EXPERIMENT_STARTED: 'A/B test experiment started',
+  
+  // Cache logging
+  CACHE_OPERATION: 'Cache operation performed',
+  CACHE_CLEARED: 'Cache cleared',
+  
+  // WebSocket logging
+  WEBSOCKET_CONNECTION: 'WebSocket connection event',
+  REALTIME_EVENT: 'Real-time event processed',
+} as const;

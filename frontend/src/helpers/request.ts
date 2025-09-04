@@ -1,7 +1,8 @@
 import { toast } from 'sonner';
 import { HTTP_STATUS, API_MESSAGES } from '@/constants/string-const';
 import { apiClient } from '@/lib/api/apiClient';
-import { extractErrorMessage } from '@/helpers/errors'
+import { extractErrorMessage } from '@/helpers/errors';
+import hackLog from '@/lib/logger';
 
 // Response interceptor for global error handling
 apiClient.interceptors.response.use(
@@ -37,16 +38,15 @@ apiClient.interceptors.response.use(
 const handleResponse = <T>(response: any, showSuccessToast = true): T => {
   const { status, data, config } = response;
 
-  console.log('🟢 [API Response]', {
-    url: config.url,
-    method: config.method,
+  hackLog.apiSuccess(config.method?.toUpperCase() || 'UNKNOWN', config.url, {
     status,
-    data: JSON.stringify(data).substring(0, 200) + (JSON.stringify(data).length > 200 ? '...' : '')
+    dataSize: JSON.stringify(data).length,
+    dataPreview: JSON.stringify(data).substring(0, 200) + (JSON.stringify(data).length > 200 ? '...' : '')
   });
 
   // Check if response status is successful
   if (status < HTTP_STATUS.OK || status >= 300) {
-    console.error('🔴 [API Error] Request failed', {
+    hackLog.apiError(config.method?.toUpperCase() || 'UNKNOWN', config.url, {
       status,
       data
     });
@@ -65,32 +65,20 @@ const handleResponse = <T>(response: any, showSuccessToast = true): T => {
   // Backend returns: {statusCode, success, message, data: actualData}
   // We need to return just the actualData
   if (data && typeof data === 'object') {
-    console.log('🟢 [API Data Structure]', {
-      hasDataProp: 'data' in data,
-      hasSuccessProp: 'success' in data,
-      hasMessageProp: 'message' in data,
-      dataType: data.data ? typeof data.data : 'undefined',
-      isDataArray: data.data ? Array.isArray(data.data) : false,
-      keys: Object.keys(data)
-    });
-
+    hackLog.dataProcess('API response structure analysis', undefined, undefined);
+    
     if ('data' in data) {
       if (data.data && typeof data.data === 'object' && 'programs' in data.data && 'total' in data.data) {
-        console.log('🟢 [API Found Paginated Programs]', {
-          programsCount: data.data.programs.length,
-          total: data.data.total,
-          page: data.data.page,
-          limit: data.data.limit
-        });
+        hackLog.dataProcess('Paginated programs found', data.data.total, data.data.programs.length);
       }
 
-      console.log('🟢 [API Extracted Data]', typeof data.data, Array.isArray(data.data) ? `Array(${data.data.length})` : '');
+      hackLog.dataProcess('Extracted data from API response', undefined, Array.isArray(data.data) ? data.data.length : 1);
       return data.data;
     }
   }
 
   // Fallback: return the data as-is if it doesn't have the expected structure
-  console.log('🟢 [API Returning Raw Data]', typeof data, Array.isArray(data) ? `Array(${data.length})` : '');
+  hackLog.warn('API response structure unexpected, returning raw data', { dataType: typeof data, isArray: Array.isArray(data) });
   return data;
 };
 
@@ -98,30 +86,35 @@ const handleResponse = <T>(response: any, showSuccessToast = true): T => {
 export const apiRequest = {
   // GET request
   get: async <T>(url: string, showSuccessToast = false): Promise<T> => {
+    hackLog.apiRequest('GET', url);
     const response = await apiClient.get<T>(url);
     return handleResponse(response, showSuccessToast);
   },
 
   // POST request
   post: async <T, D = any>(url: string, data?: D, showSuccessToast = true): Promise<T> => {
+    hackLog.apiRequest('POST', url, data);
     const response = await apiClient.post<T>(url, data);
     return handleResponse(response, showSuccessToast);
   },
 
   // PUT request
   put: async <T, D = any>(url: string, data?: D, showSuccessToast = true): Promise<T> => {
+    hackLog.apiRequest('PUT', url, data);
     const response = await apiClient.put<T>(url, data);
     return handleResponse(response, showSuccessToast);
   },
 
   // PATCH request
   patch: async <T, D = any>(url: string, data?: D, showSuccessToast = true): Promise<T> => {
+    hackLog.apiRequest('PATCH', url, data);
     const response = await apiClient.patch<T>(url, data);
     return handleResponse(response, showSuccessToast);
   },
 
   // DELETE request
   delete: async <T>(url: string, showSuccessToast = true): Promise<T> => {
+    hackLog.apiRequest('DELETE', url);
     const response = await apiClient.delete<T>(url);
     return handleResponse(response, showSuccessToast);
   },
@@ -141,7 +134,7 @@ export { apiClient };
 
 // 🚨 SWR FETCHER - USE THIS WITH INDIVIDUAL SWR HOOKS
 export const swrFetcher = async (url: string) => {
-  console.log('📡 [SWR Fetcher] Fetching:', url);
+  hackLog.dev('SWR Fetcher called', { url });
   return apiRequest.get(url, false); // Don't show success toast for GET requests
 };
 

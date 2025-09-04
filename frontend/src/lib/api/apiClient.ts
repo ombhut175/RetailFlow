@@ -1,20 +1,21 @@
 import axios from "axios";
 import { API_URL_PREFIX } from "@/constants/string-const";
+import hackLog from "@/lib/logger";
 
 // Simple function to get environment variable with fallback
 function getApiUrl(): string {
   if (typeof window !== 'undefined') {
     // Client-side: Use fallback URL due to Next.js 15 + Turbopack bug
-    console.warn('🔧 [CLIENT] Using fallback API URL due to Turbopack environment variable issue');
+    hackLog.warn('CLIENT] Using fallback API URL due to Turbopack environment variable issue');
     return 'http://localhost:5099';
   } else {
     // Server-side: Try to get the actual environment variable
     const envUrl = process.env.NEXT_PUBLIC_API_URL;
     if (envUrl) {
-      console.log('✅ [SERVER] Using environment API URL:', envUrl);
+      hackLog.info('SERVER] Using environment API URL', { envUrl });
       return envUrl;
     } else {
-      console.warn('⚠️ [SERVER] Environment variable not found, using fallback');
+      hackLog.warn('[SERVER] Environment variable not found, using fallback');
       return 'http://localhost:5099';
     }
   }

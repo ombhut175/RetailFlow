@@ -1,8 +1,10 @@
 // lib/api.ts
+import hackLog from '@/lib/logger';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5099'
 
 const fetcher = (url: string) => {
-  console.log('📡 [API] Fetching:', url)
+  hackLog.apiRequest('GET', url);
   return fetch(url, {
     headers: {
       'Content-Type': 'application/json',
@@ -11,14 +13,14 @@ const fetcher = (url: string) => {
   }).then(async (response) => {
     if (!response.ok) {
       const error = await response.text()
-      console.log('❌ [API] Error response:', { status: response.status, error })
+      hackLog.apiError('GET', url, { status: response.status, error });
       throw new Error(`Request failed with status ${response.status}`)
     }
     const data = await response.json()
-    console.log('✅ [API] Success:', data)
+    hackLog.apiSuccess('GET', url, data);
     return data
   }).catch((error) => {
-    console.log('❌ [API] Fetch failed:', error)
+    hackLog.apiError('GET', url, error);
     throw error
   })
 }

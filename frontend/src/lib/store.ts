@@ -2,6 +2,7 @@
 import { create } from 'zustand'
 import { handleError } from '@/helpers/errors' // 🚨 MUST USE helpers/errors
 import { DEBUG_MESSAGES } from '@/constants/messages'
+import hackLog from '@/lib/logger'
 
 interface TestingStore {
   // UI State
@@ -33,39 +34,39 @@ export const useTestingStore = create<TestingStore>((set, get) => ({
   
   // Actions
   setLoading: (loading) => {
-    console.log(`🔄 [${DEBUG_MESSAGES.STORE_ACTION}] Setting loading:`, loading)
+    hackLog.storeAction('setLoading', { loading })
     set({ loading })
   },
   
   setError: (error) => {
-    console.log(`❌ [${DEBUG_MESSAGES.STORE_ACTION}] Setting error:`, error)
+    hackLog.storeAction('setError', { error })
     set({ error })
   },
   
   // 🚨 FOLLOWS RULES - Uses helpers/errors
   setErrorFromException: (error) => {
-    console.log(`❌ [${DEBUG_MESSAGES.STORE_ACTION}] Processing error exception:`, error)
+    hackLog.storeAction('setErrorFromException', { error })
     const errorMessage = handleError(error, { toast: false }) // Handle error but don't show toast (store handles it)
     set({ error: errorMessage, systemStatus: 'error' })
   },
   
   setTestingData: (data) => {
-    console.log(`✅ [${DEBUG_MESSAGES.STORE_ACTION}] Setting testing data:`, data)
+    hackLog.storeAction('setTestingData', { dataType: typeof data, isArray: Array.isArray(data) })
     set({ testingData: data })
   },
   
   setLastRefresh: (date) => {
-    console.log(`🕒 [${DEBUG_MESSAGES.STORE_ACTION}] Setting last refresh:`, date)
+    hackLog.storeAction('setLastRefresh', { date })
     set({ lastRefresh: date })
   },
   
   setSystemStatus: (status) => {
-    console.log(`📊 [${DEBUG_MESSAGES.STORE_ACTION}] Setting system status:`, status)
+    hackLog.storeAction('setSystemStatus', { status })
     set({ systemStatus: status })
   },
   
   clearData: () => {
-    console.log(`🧹 [${DEBUG_MESSAGES.STORE_ACTION}] Clearing all data`)
+    hackLog.storeAction('clearData')
     set({ 
       testingData: null, 
       error: null, 
