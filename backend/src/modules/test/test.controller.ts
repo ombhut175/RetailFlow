@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { SupabaseService } from '../../core/supabase/supabase.service';
 import { TestService } from './test.service';
 import { successResponse } from '../../common/helpers/api-response.helper';
+import { AuthGuard, CurrentUser } from '../../common';
 
 @ApiTags('test')
 @Controller('test')
@@ -220,6 +221,132 @@ export class TestController {
       this.logger.error('Failed to retrieve testing data', error.stack);
       throw error;
     }
+  }
+
+  //#endregion
+
+  //#region ==================== AUTH GUARD TESTS ====================
+
+  @Get('auth/profile')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Test AuthGuard - Get current user profile',
+    description: 'Protected endpoint that requires valid Bearer token. Demonstrates AuthGuard usage.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'User profile retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 200 },
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'User profile retrieved successfully' },
+        data: { 
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+            email: { type: 'string', example: 'user@example.com' },
+            authenticated: { type: 'boolean', example: true },
+            timestamp: { type: 'string', example: '2023-01-01T00:00:00Z' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing token' })
+  async getAuthenticatedProfile(@CurrentUser() user: any) {
+    this.logger.log('Authenticated user accessing profile', {
+      operation: 'getAuthenticatedProfile',
+      userId: user.id,
+      email: user.email,
+      timestamp: new Date().toISOString(),
+    });
+
+    const profileData = {
+      id: user.id,
+      email: user.email,
+      authenticated: true,
+      timestamp: new Date().toISOString(),
+    };
+
+    return successResponse(profileData, 'User profile retrieved successfully');
+  }
+
+  @Get('auth/user-id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Test AuthGuard - Get only user ID',
+    description: 'Protected endpoint that extracts only user ID using @CurrentUser("id") decorator.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'User ID retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 200 },
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'User ID retrieved successfully' },
+        data: { 
+          type: 'object',
+          properties: {
+            userId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+            extractedAt: { type: 'string', example: '2023-01-01T00:00:00Z' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing token' })
+  async getUserId(@CurrentUser('id') userId: string) {
+    this.logger.log('User ID extracted successfully', {
+      operation: 'getUserId',
+      userId,
+      timestamp: new Date().toISOString(),
+    });
+
+    const responseData = {
+      userId,
+      extractedAt: new Date().toISOString(),
+    };
+
+    return successResponse(responseData, 'User ID retrieved successfully');
+  }
+
+  @Get('auth/full-user')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Test AuthGuard - Get full Supabase user object',
+    description: 'Protected endpoint that returns complete user information from Supabase.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Full user data retrieved successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing token' })
+  async getFullUser(@CurrentUser() user: any) {
+    this.logger.log('Full user data requested', {
+      operation: 'getFullUser',
+      userId: user.id,
+      email: user.email,
+      hasSupabaseUser: !!user.supabaseUser,
+      timestamp: new Date().toISOString(),
+    });
+
+    const fullUserData = {
+      basic: {
+        id: user.id,
+        email: user.email,
+      },
+      supabase: user.supabaseUser,
+      requestedAt: new Date().toISOString(),
+    };
+
+    return successResponse(fullUserData, 'Full user data retrieved successfully');
   }
 
   //#endregion

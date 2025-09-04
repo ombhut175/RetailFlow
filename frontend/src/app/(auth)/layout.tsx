@@ -6,8 +6,8 @@ import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { Moon, Sun, GraduationCap } from "lucide-react";
 
-// Layout for /quodo routes: wraps pages with ThemeProvider, animated header, and premium background
-export default function QuodoLayout({ children }: { children: React.ReactNode }) {
+// Layout for auth routes: wraps pages with ThemeProvider, animated header, and premium background
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
       <div className="relative min-h-dvh bg-gradient-to-b from-white to-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:from-[#0B1020] dark:to-[#0A0F1D] dark:text-slate-100">
@@ -21,7 +21,7 @@ export default function QuodoLayout({ children }: { children: React.ReactNode })
         <main className="relative z-10">
           <AnimatePresence mode="wait">
             <motion.div
-              key={(typeof window !== "undefined" && window.location.pathname) || "quodo"}
+              key={(typeof window !== "undefined" && window.location.pathname) || "auth"}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -42,38 +42,30 @@ function Header() {
   return (
     <header className="sticky top-0 z-20 w-full border-b border-black/5 bg-white/70 backdrop-blur-md transition-colors dark:border-white/10 dark:bg-[#0B1020]/60">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
-        <Link href="/quodo/login" className="group inline-flex items-center gap-2">
+        <Link href="/login" className="group inline-flex items-center gap-2">
           <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-indigo-500 via-violet-500 to-fuchsia-500 shadow-sm ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-105 dark:ring-white/10">
             <GraduationCap className="h-5 w-5 text-white drop-shadow" />
           </span>
           <div className="flex flex-col leading-tight">
             <span className="text-base font-semibold tracking-tight">Quodo</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">EdTech Platform</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</span>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
-          <NavLink href="/quodo/login">Login</NavLink>
-          <NavLink href="/quodo/signup">Sign up</NavLink>
+        <nav className="hidden items-center gap-6 md:flex">
+          <Link href="/login" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
+            Sign In
+          </Link>
+          <Link href="/signup" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
+            Sign Up
+          </Link>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <ModeToggle />
         </div>
       </div>
     </header>
-  );
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="group relative rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-    >
-      <span className="relative z-10">{children}</span>
-      <span className="absolute inset-0 -z-0 rounded-md bg-slate-900/5 opacity-0 transition-opacity group-hover:opacity-100 dark:bg-white/5" />
-    </Link>
   );
 }
 

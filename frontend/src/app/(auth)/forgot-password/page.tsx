@@ -1,31 +1,77 @@
 "use client";
 
 import * as React from "react";
-import AuthCard, { Field, Input, SubmitButton, MutedLink } from "../_components/auth-card";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
+import AuthCard, { Field, Input, SubmitButton, MutedLink } from "../_components/auth-card";
+import { useAuthStore } from "@/hooks/use-auth-store";
+import { useGuestProtection } from "@/components/auth/auth-provider";
+import hackLog from "@/lib/logger";
 
 export default function ForgotPasswordPage() {
-  const [loading, setLoading] = React.useState(false);
+  const { forgotPassword, isForgotPasswordLoading, forgotPasswordError, clearErrors } = useAuthStore();
+  const { shouldRender } = useGuestProtection();
   const [sent, setSent] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [formError, setFormError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    hackLog.componentMount('ForgotPasswordPage', {
+      hasForgotPasswordError: !!forgotPasswordError,
+      isLoading: isForgotPasswordLoading
+    });
+
+    // Clear any previous errors when component mounts
+    clearErrors();
+  }, [clearErrors]);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const email = String(new FormData(event.currentTarget).get("email") || "").trim();
+    
+    hackLog.formSubmit('forgotPassword', {
+      email,
+      component: 'ForgotPasswordPage'
+    });
+
+    // Clear previous errors
+    setFormError(null);
+    clearErrors();
+
+    // Validate email
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Enter a valid email address");
+      setFormError("Enter a valid email address");
+      hackLog.formValidation('forgotPassword', { email: 'Invalid email' });
       return;
     }
-    setError(null);
-    setLoading(true);
+
     try {
-      await new Promise((r) => setTimeout(r, 1000));
-      setSent(true);
-    } catch (e) {
-      setError("Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
+      const success = await forgotPassword({ email });
+      
+      if (success) {
+        hackLog.storeAction('forgotPasswordSuccess', {
+          email,
+          component: 'ForgotPasswordPage'
+        });
+        
+        setSent(true);
+        toast.success('Password reset email sent successfully!');
+      }
+      // If forgot password failed, error is already in forgotPasswordError from store
+    } catch (error: any) {
+      hackLog.error('Forgot password submission failed', {
+        error: error.message,
+        email,
+        component: 'ForgotPasswordPage'
+      });
     }
+  }
+
+  // Display either form validation error or API error
+  const displayError = formError || forgotPasswordError;
+
+  // Don't render if user is already authenticated
+  if (!shouldRender) {
+    return null;
   }
 
   return (
@@ -41,7 +87,7 @@ export default function ForgotPasswordPage() {
           footer={
             <div className="space-x-1">
               <span>Remembered it?</span>
-              <MutedLink href="/quodo/login">Back to login</MutedLink>
+              <MutedLink href="/login">Back to login</MutedLink>
             </div>
           }
         >
@@ -51,11 +97,11 @@ export default function ForgotPasswordPage() {
             </motion.div>
           ) : (
             <form className="grid gap-4" onSubmit={onSubmit}>
-              <Field label="Email" error={error ?? undefined}>
+              <Field label="Email" error={displayError ?? undefined}>
                 <Input name="email" type="email" inputMode="email" placeholder="you@school.edu" autoComplete="email" required />
               </Field>
 
-              <SubmitButton type="submit" loading={loading}>
+              <SubmitButton type="submit" loading={isForgotPasswordLoading}>
                 Send reset link
               </SubmitButton>
             </form>

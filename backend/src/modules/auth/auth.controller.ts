@@ -38,7 +38,7 @@ import {
   ErrorResponseDto,
 } from './dto';
 import { successResponse } from '../../common/helpers/api-response.helper';
-import { COOKIES } from '../../common/constants/string-const';
+import { COOKIES, ENV } from '../../common/constants/string-const';
 
 @ApiTags('Authentication')
 @Controller('auth')

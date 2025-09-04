@@ -5,7 +5,9 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import LoggerInit from "@/components/logger-init";
+import { Toaster } from "sonner";
 import hackLog from "@/lib/logger";
 import "./globals.css";
 
@@ -18,8 +20,8 @@ if (typeof window === 'undefined') {
 }
 
 export const metadata: Metadata = {
-  title: "Theme Reference System",
-  description: "Comprehensive theme reference for design systems",
+  title: "Quodo - Learning Platform",
+  description: "Accelerate your learning journey with personalized courses and expert mentorship",
   generator: "v0.app"
 };
 
@@ -30,9 +32,18 @@ export default function RootLayout({
 }>) {
   return <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased overflow-x-hidden ${GeistSans.variable} ${GeistMono.variable}`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="theme-reference-theme">
-          <LoggerInit />
-          {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="quodo-theme">
+          <AuthProvider>
+            <LoggerInit />
+            {children}
+            <Toaster 
+              richColors 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+              }}
+            />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>;

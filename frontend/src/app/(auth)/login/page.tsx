@@ -4,20 +4,37 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import AuthCard, { Field, Input, PasswordInput, SubmitButton, MutedLink } from "../_components/auth-card";
+import { useAuthStore } from "@/hooks/use-auth-store";
+import { useGuestProtection } from "@/components/auth/auth-provider";
+import hackLog from "@/lib/logger";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [loading, setLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState<{ email?: string; password?: string } | null>(null);
+  const { login, isLoginLoading, loginError, clearErrors } = useAuthStore();
+  const { shouldRender } = useGuestProtection();
+  const [formErrors, setFormErrors] = React.useState<{ email?: string; password?: string } | null>(null);
+
+  React.useEffect(() => {
+    hackLog.componentMount('LoginPage', {
+      hasLoginError: !!loginError,
+      isLoading: isLoginLoading
+    });
+
+    // Clear any previous errors when component mounts
+    clearErrors();
+  }, [clearErrors]);
 
   function validate(form: FormData) {
     const email = String(form.get("email") || "").trim();
     const password = String(form.get("password") || "");
     const nextErrors: { email?: string; password?: string } = {};
+    
     if (!email) nextErrors.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) nextErrors.email = "Enter a valid email";
     if (!password) nextErrors.password = "Password is required";
+    
     return { email, password, nextErrors };
   }
 
@@ -25,20 +42,55 @@ export default function LoginPage() {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const { email, password, nextErrors } = validate(form);
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length) return;
+    
+    hackLog.formSubmit('login', {
+      email,
+      passwordLength: password.length,
+      hasValidationErrors: Object.keys(nextErrors).length > 0,
+      component: 'LoginPage'
+    });
 
-    setLoading(true);
+    // Clear previous errors
+    setFormErrors(null);
+    clearErrors();
+
+    // Check for validation errors
+    if (Object.keys(nextErrors).length) {
+      setFormErrors(nextErrors);
+      hackLog.formValidation('login', nextErrors);
+      return;
+    }
+
     try {
-      // Simulate request
-      await new Promise((r) => setTimeout(r, 1000));
-      router.push("/dashboard");
-    } catch (e) {
-      setErrors({ password: "Invalid email or password" });
-    } finally {
-      setLoading(false);
+      const success = await login({ email, password });
+      
+      if (success) {
+        hackLog.storeAction('loginRedirect', {
+          email,
+          redirectTo: '/dashboard',
+          component: 'LoginPage'
+        });
+        
+        toast.success('Welcome back! Login successful.');
+        router.push("/dashboard");
+      }
+      // If login failed, error is already in loginError from store
+    } catch (error: any) {
+      hackLog.error('Login submission failed', {
+        error: error.message,
+        email,
+        component: 'LoginPage'
+      });
     }
   }
+
+  // Don't render if user is already authenticated
+  if (!shouldRender) {
+    return null;
+  }
+
+  // Display either form validation errors or API errors
+  const displayErrors = formErrors || (loginError ? { password: loginError } : null);
 
   return (
     <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 md:grid-cols-2">
@@ -54,16 +106,16 @@ export default function LoginPage() {
           footer={
             <div className="space-x-1">
               <span>New to Quodo?</span>
-              <MutedLink href="/quodo/signup">Create an account</MutedLink>
+              <MutedLink href="/signup">Create an account</MutedLink>
             </div>
           }
         >
           <form className="grid gap-4" onSubmit={onSubmit}>
-            <Field label="Email" error={errors?.email}>
+            <Field label="Email" error={displayErrors?.email}>
               <Input name="email" type="email" inputMode="email" placeholder="you@school.edu" autoComplete="email" required />
             </Field>
 
-            <Field label="Password" error={errors?.password}>
+            <Field label="Password" error={displayErrors?.password}>
               <PasswordInput name="password" placeholder="••••••••" autoComplete="current-password" required />
             </Field>
 
@@ -72,10 +124,10 @@ export default function LoginPage() {
                 <input type="checkbox" name="remember" className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
                 <span>Remember me</span>
               </label>
-              <MutedLink href="/quodo/forgot-password">Forgot password?</MutedLink>
+              <MutedLink href="/forgot-password">Forgot password?</MutedLink>
             </div>
 
-            <SubmitButton type="submit" loading={loading}>
+            <SubmitButton type="submit" loading={isLoginLoading}>
               Continue
             </SubmitButton>
 

@@ -29,6 +29,7 @@ export const envValidationSchema = Joi.object({
 
   // Frontend URL for auth redirects
   [ENV.FRONTEND_URL]: Joi.string().uri().optional().default('http://localhost:3000'),
+  [ENV.REDIRECT_TO_FRONTEND_URL]: Joi.string().uri().optional().default('http://localhost:3000/login'),
 }).custom((value, helpers) => {
   // Ensure either DATABASE_URL or all individual database parameters are provided
   const hasDatabaseUrl = value[ENV.DATABASE_URL];

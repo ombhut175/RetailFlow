@@ -1,7 +1,7 @@
 import { Injectable, Logger, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { SupabaseService } from '../../core/supabase/supabase.service';
 import { UsersRepository } from '../../core/database/repositories';
-import { MESSAGES } from '../../common/constants/string-const';
+import { MESSAGES, ENV } from '../../common/constants/string-const';
 import { LoginDto, SignupDto, ForgotPasswordDto } from './dto';
 
 @Injectable()
@@ -90,7 +90,7 @@ export class AuthService {
         email: signupDto.email,
         password: signupDto.password,
         options: {
-          emailRedirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/confirm`,
+          emailRedirectTo: `${process.env[ENV.REDIRECT_TO_FRONTEND_URL] || `${process.env[ENV.FRONTEND_URL]}/login`}`,
         },
       });
 
@@ -151,7 +151,7 @@ export class AuthService {
       const supabase = this.supabaseService.getClient();
 
       const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordDto.email, {
-        redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password`,
+        redirectTo: `${process.env[ENV.FRONTEND_URL] || 'http://localhost:3000'}/auth/reset-password`,
       });
 
       if (error) {
