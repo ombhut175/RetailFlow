@@ -139,6 +139,12 @@ export const apiRequestRaw = {
 // Export axios instance for custom usage if needed
 export { apiClient };
 
+// 🚨 SWR FETCHER - USE THIS WITH INDIVIDUAL SWR HOOKS
+export const swrFetcher = async (url: string) => {
+  console.log('📡 [SWR Fetcher] Fetching:', url);
+  return apiRequest.get(url, false); // Don't show success toast for GET requests
+};
+
 // Types for API responses
 export interface ApiResponse<T = any> {
   success: boolean;

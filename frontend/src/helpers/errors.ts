@@ -1,62 +1,136 @@
-import axios, { AxiosError } from 'axios'
-import { toast } from '@/hooks/use-toast'
+// 🚨 MANDATORY FILE - ALL ERROR HANDLING MUST USE THIS FILE
+// This file handles ALL error processing in the application
+// NO inline error handling allowed anywhere else
 
-type BackendErrorBody = {
-  statusCode?: number
-  message?: string | string[]
-  timestamp?: string
-  path?: string
-  error?: string
+import { ERROR_MESSAGES, DEBUG_MESSAGES } from '@/constants/messages';
+import { toast } from 'sonner'; // Using sonner for toast notifications
+
+// Error handling options
+interface ErrorHandlingOptions {
+  toast?: boolean;
+  fallbackMessage?: string;
+  logToConsole?: boolean;
+  suppressConsoleError?: boolean;
 }
 
-export function extractErrorMessage(error: unknown, fallback = 'Something went wrong'): string {
-  // Axios error with response from backend
-  if (axios.isAxiosError(error)) {
-    const err = error as AxiosError<BackendErrorBody | string | any>
-    const data = err.response?.data
-    if (data) {
-      if (typeof data === 'string') return data
-      const body = data as BackendErrorBody
-      const msg = Array.isArray(body.message) ? body.message[0] : body.message
-      if (msg && String(msg).trim().length > 0) return String(msg)
-      if (body.error && String(body.error).trim().length > 0) return String(body.error)
+// Extract meaningful error message from any error type
+export function extractErrorMessage(error: unknown, fallback?: string): string {
+  const defaultFallback = fallback || ERROR_MESSAGES.SOMETHING_WENT_WRONG;
+  console.log(`🔍 [${DEBUG_MESSAGES.API_REQUEST_FAILED}] Extracting error message:`, error);
+
+  // Network/Fetch API errors
+  if (error instanceof TypeError && error.message.includes('fetch')) {
+    return ERROR_MESSAGES.NETWORK_ERROR;
+  }
+
+  // Timeout errors
+  if (error instanceof Error && error.name === 'TimeoutError') {
+    return ERROR_MESSAGES.TIMEOUT_ERROR;
+  }
+
+  // API Response errors (when we get a response but it's an error)
+  if (error instanceof Error && error.message.startsWith('API Error:')) {
+    // Try to parse backend error message
+    try {
+      const errorParts = error.message.split(' - ');
+      if (errorParts.length > 1) {
+        const backendMessage = errorParts.slice(1).join(' - ');
+        // Try to parse JSON if it looks like JSON
+        if (backendMessage.startsWith('{') && backendMessage.endsWith('}')) {
+          const parsed = JSON.parse(backendMessage);
+          if (parsed.message) return String(parsed.message);
+          if (parsed.error) return String(parsed.error);
+        }
+        return backendMessage;
+      }
+    } catch {
+      // If parsing fails, use the original message
     }
-    if (err.message) return err.message
   }
 
-  // Native Error
+  // Standard Error objects
   if (error instanceof Error) {
-    return error.message || fallback
+    return error.message || defaultFallback;
   }
 
-  // String
-  if (typeof error === 'string') return error
+  // String errors
+  if (typeof error === 'string') {
+    return error;
+  }
 
+  // Object errors (try to extract message)
+  if (typeof error === 'object' && error !== null) {
+    const errorObj = error as any;
+    if (errorObj.message) return String(errorObj.message);
+    if (errorObj.error) return String(errorObj.error);
+    if (errorObj.statusText) return String(errorObj.statusText);
+    
+    // Try to stringify if it has useful info
+    try {
+      const stringified = JSON.stringify(error);
+      if (stringified !== '{}' && stringified.length < 200) {
+        return stringified;
+      }
+    } catch {
+      // Ignore JSON stringify errors
+    }
+  }
+
+  return defaultFallback;
+}
+
+// 🚨 MAIN ERROR HANDLER - USE THIS EVERYWHERE
+export function handleError(error: unknown, options: ErrorHandlingOptions = {}) {
+  const {
+    toast: showToast = true,
+    fallbackMessage = ERROR_MESSAGES.SOMETHING_WENT_WRONG,
+    logToConsole = true,
+    suppressConsoleError = false,
+  } = options;
+
+  const message = extractErrorMessage(error, fallbackMessage);
+
+  // Console logging
+  if (logToConsole && !suppressConsoleError) {
+    console.error(`❌ [Error Handler]`, {
+      message,
+      originalError: error,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+  }
+
+  // Toast notification
+  if (showToast) {
+    toast.error(message);
+  }
+
+  return message;
+}
+
+// 🚨 ASYNC ERROR WRAPPER - USE FOR ALL ASYNC FUNCTIONS
+export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
+  asyncFn: T,
+  options: ErrorHandlingOptions = {}
+): T {
+  return (async (...args: Parameters<T>) => {
+    try {
+      return await asyncFn(...args);
+    } catch (error) {
+      handleError(error, options);
+      throw error; // Re-throw so calling code can handle it too if needed
+    }
+  }) as T;
+}
+
+// 🚨 PROMISE ERROR CATCHER - USE WITH PROMISES
+export async function catchErrors<T>(
+  promise: Promise<T>,
+  options: ErrorHandlingOptions = {}
+): Promise<T | null> {
   try {
-    return JSON.stringify(error)
-  } catch {
-    return fallback
+    return await promise;
+  } catch (error) {
+    handleError(error, options);
+    return null;
   }
-}
-
-export function handleError(error: unknown, options?: { toast?: boolean; fallbackMessage?: string }) {
-  const { toast: shouldToast = true, fallbackMessage } = options || {}
-  const message = extractErrorMessage(error, fallbackMessage)
-  if (shouldToast) {
-    toast({
-      title: 'Error',
-      description: message,
-      // You can set variant via your Toast component props if supported
-    })
-  }
-  return message
-}
-
-export function getErrorTitle(error: unknown): string {
-  // Provide a short title for UI components
-  if (axios.isAxiosError(error)) {
-    const status = error.response?.status
-    if (status) return `Request failed (${status})`
-  }
-  return 'Something went wrong'
 }

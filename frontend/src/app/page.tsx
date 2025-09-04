@@ -1,0 +1,416 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  GraduationCap,
+  Rocket,
+  BrainCircuit,
+  BookOpenCheck,
+  ShieldCheck,
+  Users,
+  Sparkles,
+  ArrowRight,
+  PlayCircle,
+} from "lucide-react";
+
+// Motion variants
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.06 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.2, 0.8, 0.2, 1] } },
+};
+
+type Feature = {
+  title: string;
+  desc: string;
+  icon: React.ReactNode;
+  points: string[];
+};
+
+export default function LandingPage() {
+  return (
+    <div className="relative min-h-screen bg-gradient-to-b from-background to-muted/40 text-foreground antialiased">
+      <BackgroundAura />
+      <Header />
+
+      <main className="relative z-10 px-4 md:px-6">
+        <Hero />
+        <Highlights />
+        <Stats />
+        <CTA />
+        <Footer />
+      </main>
+    </div>
+  );
+}
+
+function Header() {
+  return (
+    <header className="sticky top-0 z-30 w-full border-b border-border/60 bg-card/70 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
+        <Link href="/" className="group inline-flex items-center gap-2">
+          <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-indigo-500 via-violet-500 to-fuchsia-500 shadow-sm ring-1 ring-border transition-transform duration-200 group-hover:scale-105">
+            <GraduationCap className="h-5 w-5 text-white drop-shadow" />
+          </span>
+          <div className="flex flex-col leading-tight">
+            <span className="text-base font-semibold tracking-tight">Quodo</span>
+            <span className="text-[11px] text-muted-foreground">EdTech Platform</span>
+          </div>
+        </Link>
+
+        <nav className="hidden items-center gap-1 md:flex">
+          <HeaderLink href="#features">Features</HeaderLink>
+          <HeaderLink href="#how-it-works">How it works</HeaderLink>
+          <HeaderLink href="#pricing">Pricing</HeaderLink>
+          <HeaderLink href="/styleguide">Styleguide</HeaderLink>
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <GhostLink href="/quodo/login" className="hidden sm:inline-flex">Login</GhostLink>
+          <PrimaryLink href="/quodo/signup">Get started</PrimaryLink>
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function HeaderLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="group relative rounded-md px-3 py-2 text-sm font-medium text-foreground/90 transition-colors hover:text-foreground"
+    >
+      <span className="relative z-10">{children}</span>
+      <span className="absolute inset-0 -z-0 rounded-md bg-foreground/5 opacity-0 transition-opacity group-hover:opacity-100" />
+      <span className="pointer-events-none absolute inset-x-3 -bottom-0.5 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+    </Link>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 py-14 md:grid-cols-2 md:py-20 lg:py-24">
+      <motion.div variants={container} initial="hidden" animate="show" className="order-2 md:order-1">
+        <motion.div variants={item} className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-sm">
+          <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
+          Learn smarter with AI-guided paths
+        </motion.div>
+        <motion.h1 variants={item} className="mt-4 bg-gradient-to-r from-foreground via-indigo-600 to-fuchsia-600 bg-clip-text text-4xl font-extrabold leading-tight tracking-tight text-transparent md:text-5xl lg:text-6xl dark:via-indigo-300 dark:to-fuchsia-300">
+          Unlock your next skill, faster
+        </motion.h1>
+        <motion.p variants={item} className="mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
+          Quodo is the modern learning platform for ambitious learners. Follow curated roadmaps, track progress, and master skills with hands-on projects.
+        </motion.p>
+        <motion.div variants={item} className="mt-6 flex flex-wrap items-center gap-3">
+          <PrimaryLink href="/quodo/signup" className="gap-2">
+            Start learning free
+            <ArrowRight className="h-4 w-4" />
+          </PrimaryLink>
+          <GhostLink href="/quodo/login" className="gap-2">
+            <PlayCircle className="h-4 w-4" />
+            View demo
+          </GhostLink>
+        </motion.div>
+        <motion.div variants={item} className="mt-6 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" />Trusted by 10k+ learners</div>
+          <div className="flex items-center gap-2"><Users className="h-4 w-4 text-sky-500" />Cohort-based learning</div>
+        </motion.div>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.6 }} className="order-1 md:order-2">
+        <HeroVisual />
+      </motion.div>
+    </section>
+  );
+}
+
+function useTilt() {
+  const ref = React.useRef<HTMLDivElement | null>(null);
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const rx = useSpring(useTransform(my, [0, 1], [8, -8]), { stiffness: 150, damping: 16 });
+  const ry = useSpring(useTransform(mx, [0, 1], [-8, 8]), { stiffness: 150, damping: 16 });
+
+  function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    mx.set(x);
+    my.set(y);
+    el.style.setProperty("--x", `${x * 100}%`);
+    el.style.setProperty("--y", `${y * 100}%`);
+  }
+  function onMouseLeave() { mx.set(0.5); my.set(0.5); }
+  return { ref, rx, ry, onMouseMove, onMouseLeave } as const;
+}
+
+function HeroVisual() {
+  const { ref, rx, ry, onMouseMove, onMouseLeave } = useTilt();
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d" }}
+      className="group relative will-change-transform"
+    >
+      {/* Animated gradient frame */}
+      <div aria-hidden className="pointer-events-none absolute -inset-[1px] rounded-[22px]">
+        <motion.div
+          className="absolute inset-0 rounded-[22px] opacity-80"
+          style={{
+            background:
+              "conic-gradient(from 0deg at 50% 50%, rgba(99,102,241,0.35), rgba(236,72,153,0.35), rgba(34,197,94,0.35), rgba(99,102,241,0.35))",
+            filter: "blur(10px)",
+          }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+
+      {/* Card */}
+      <div className="relative overflow-hidden rounded-[20px] border border-border bg-card/80 p-6 shadow-2xl ring-1 ring-border/60 backdrop-blur-md md:p-7">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-2 rounded-[20px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{ background: "radial-gradient(220px 220px at var(--x,50%) var(--y,0%), rgba(99,102,241,0.18), transparent 60%)" }}
+        />
+
+        <div className="relative z-10 flex flex-col gap-4" style={{ transform: "translateZ(30px)" }}>
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Your AI learning copilot</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Adaptive roadmaps, instant feedback, and project-driven lessons — all tailored to your goals.
+            </p>
+          </div>
+          <ul className="grid gap-3 text-sm">
+            <li className="rounded-xl border border-border bg-card/70 p-3 shadow-sm transition-colors">
+              <div className="flex items-center gap-2"><BrainCircuit className="h-4 w-4 text-fuchsia-500" /> Personalized AI study paths</div>
+            </li>
+            <li className="rounded-xl border border-border bg-card/70 p-3 shadow-sm transition-colors">
+              <div className="flex items-center gap-2"><BookOpenCheck className="h-4 w-4 text-indigo-500" /> Hands-on projects, real outcomes</div>
+            </li>
+            <li className="rounded-xl border border-border bg-card/70 p-3 shadow-sm transition-colors">
+              <div className="flex items-center gap-2"><Rocket className="h-4 w-4 text-emerald-500" /> Track progress and build momentum</div>
+            </li>
+          </ul>
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      </div>
+    </motion.div>
+  );
+}
+
+function Highlights() {
+  return (
+    <section id="features" className="mx-auto max-w-6xl py-10 md:py-14 lg:py-16">
+      <div className="mx-auto mb-8 max-w-2xl text-center md:mb-12">
+        <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Everything you need to accelerate learning</h2>
+        <p className="mt-2 text-muted-foreground">Designed with a premium, modern aesthetic that matches your auth theme.</p>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {features.map((f) => (
+          <motion.div key={f.title as string} whileHover={{ y: -4 }} whileTap={{ scale: 0.995 }} className="h-full">
+            <div className="group h-full overflow-hidden rounded-2xl border border-border bg-card/80 shadow-sm transition-all hover:shadow-xl">
+              <div className="p-6">
+                <div className="flex items-start gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-indigo-500/20 via-violet-500/20 to-fuchsia-500/20 ring-1 ring-border">
+                    {f.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold leading-tight tracking-tight">{f.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{f.desc}</p>
+                  </div>
+                </div>
+                <ul className="mt-4 grid gap-2 text-sm text-muted-foreground">
+                  {f.points.map((p) => (
+                    <li key={p} className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary" /> {p}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+const features: Feature[] = [
+  {
+    title: "Adaptive Learning",
+    desc: "AI tailors lessons to your strengths and areas for growth.",
+    icon: <BrainCircuit className="h-5 w-5 text-fuchsia-600 dark:text-fuchsia-400" />,
+    points: ["Personalized modules", "Dynamic difficulty", "Smart reminders"],
+  },
+  {
+    title: "Project-Based Curriculum",
+    desc: "Build a real portfolio with guided, hands-on projects.",
+    icon: <BookOpenCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />,
+    points: ["Step-by-step briefs", "Real-world scenarios", "Code reviews"],
+  },
+  {
+    title: "Motivation & Momentum",
+    desc: "Stay consistent with streaks, checkpoints, and cohorts.",
+    icon: <Rocket className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />,
+    points: ["Weekly sprints", "Peer accountability", "Progress tracker"],
+  },
+];
+
+function Stats() {
+  return (
+    <section className="mx-auto max-w-6xl py-10 md:py-14 lg:py-16">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.4 }}
+        transition={{ duration: 0.5 }}
+        className="grid gap-6 rounded-3xl border border-border bg-card/70 p-6 shadow-sm backdrop-blur-sm md:grid-cols-4"
+      >
+        {[
+          { label: "Active learners", value: "10k+" },
+          { label: "Completion rate", value: "92%" },
+          { label: "Projects shipped", value: "25k+" },
+          { label: "Avg. review score", value: "4.8/5" },
+        ].map((s) => (
+          <div key={s.label} className="text-center md:text-left">
+            <div className="text-3xl font-semibold tracking-tight">{s.value}</div>
+            <div className="mt-1 text-sm text-muted-foreground">{s.label}</div>
+          </div>
+        ))}
+      </motion.div>
+    </section>
+  );
+}
+
+function CTA() {
+  return (
+    <section id="pricing" className="relative mx-auto max-w-6xl py-12 md:py-16 lg:py-20">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.4 }}
+        transition={{ duration: 0.5 }}
+        className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-indigo-500/15 via-violet-500/10 to-fuchsia-500/15 p-8 shadow-2xl backdrop-blur-sm"
+      >
+        <div className="grid gap-8 md:grid-cols-2 md:items-center">
+          <div>
+            <h3 className="text-2xl font-bold tracking-tight md:text-3xl">Start learning today — it’s free to try</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Create your account in seconds. Access core modules free. Upgrade anytime to unlock cohorts and advanced mentorship.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 md:justify-end">
+            <PrimaryLink href="/quodo/signup" className="gap-2">
+              Create free account
+              <ArrowRight className="h-4 w-4" />
+            </PrimaryLink>
+            <GhostLink href="/quodo/login">I already have an account</GhostLink>
+          </div>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="mx-auto mt-10 max-w-6xl border-t border-border py-8 text-sm text-muted-foreground">
+      <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+        <div className="flex items-center gap-2 text-foreground">
+          <span className="relative grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-tr from-indigo-500 via-violet-500 to-fuchsia-500 ring-1 ring-border">
+            <GraduationCap className="h-4 w-4 text-white" />
+          </span>
+          <span className="font-medium">Quodo</span>
+          <span className="text-xs text-muted-foreground">© {new Date().getFullYear()}</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <Link href="/quodo/login" className="link-underline-anim">Login</Link>
+          <Link href="/quodo/signup" className="link-underline-anim">Sign up</Link>
+          <Link href="/styleguide" className="link-underline-anim">Styleguide</Link>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+function BackgroundAura() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      {/* Soft radial gradient blobs */}
+      <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-indigo-400/30 to-fuchsia-400/20 blur-3xl dark:from-indigo-500/20 dark:to-fuchsia-500/10" />
+      <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-sky-400/25 to-emerald-400/20 blur-3xl dark:from-sky-500/15 dark:to-emerald-500/10" />
+
+      {/* Subtle grid pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.35] [mask-image:radial-gradient(55%_60%_at_50%_40%,black,transparent)] dark:opacity-[0.25]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, rgba(100,116,139,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(100,116,139,0.15) 1px, transparent 1px)",
+          backgroundSize: "28px 28px, 28px 28px",
+          backgroundPosition: "-1px -1px",
+        }}
+      />
+
+      {/* Top highlight line */}
+      <div className="absolute inset-x-0 top-[64px] h-px bg-gradient-to-r from-transparent via-foreground/10 to-transparent" />
+    </div>
+  );
+}
+
+// Styled anchor buttons (no invalid nested button inside Link)
+function PrimaryLink({ href, className, children }: { href: string; className?: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className={[
+        "group relative inline-flex h-11 items-center justify-center rounded-xl px-4 text-sm font-semibold text-white",
+        "shadow-lg shadow-indigo-600/20 ring-1 ring-white/15",
+        "transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/30",
+        "btn-super",
+        className,
+      ].filter(Boolean).join(" ")}
+      style={{ backgroundImage: "linear-gradient(135deg,#4f46e5,#7c3aed,#ec4899)" }}
+    >
+      <span className="relative z-10 flex items-center gap-2">{children}</span>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: "linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)",
+          backgroundSize: "200% 100%",
+          mixBlendMode: "overlay",
+        }}
+      />
+    </Link>
+  );
+}
+
+function GhostLink({ href, className, children }: { href: string; className?: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className={[
+        "relative inline-flex h-11 items-center justify-center rounded-xl px-4 text-sm font-semibold",
+        "border border-border bg-card/60 text-foreground/90 hover:text-foreground",
+        "transition-all shadow-sm hover:shadow-md",
+        className,
+      ].filter(Boolean).join(" ")}
+    >
+      {children}
+    </Link>
+  );
+}

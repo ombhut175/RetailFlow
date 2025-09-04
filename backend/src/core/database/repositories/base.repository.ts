@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DrizzleService } from '../drizzle.service';
 import { NotFoundException } from '@nestjs/common';
 import { MESSAGES } from '../../../common/constants/string-const';
@@ -6,6 +6,8 @@ import { eq, count } from 'drizzle-orm';
 
 @Injectable()
 export abstract class BaseRepository<T> {
+  protected readonly logger = new Logger(this.constructor.name);
+
   constructor(protected readonly drizzleService: DrizzleService) {}
 
   protected get db() {
@@ -24,13 +26,22 @@ export abstract class BaseRepository<T> {
     id: string | number,
     errorMessage = MESSAGES.NOT_FOUND,
   ): Promise<T> {
-    const result = await this.db.select().from(table).where(eq((table as any).id, id)).limit(1);
+    this.logger.log(`Finding record by ID: ${id}`);
     
-    if (!result.length) {
-      throw new NotFoundException(errorMessage);
+    try {
+      const result = await this.db.select().from(table).where(eq((table as any).id, id)).limit(1);
+      
+      if (!result.length) {
+        this.logger.warn(`Record not found with ID: ${id}`);
+        throw new NotFoundException(errorMessage);
+      }
+      
+      this.logger.log(`Record found successfully with ID: ${id}`);
+      return result[0] as T;
+    } catch (error) {
+      this.logger.error(`Error finding record by ID ${id}`, error.stack);
+      throw error;
     }
-    
-    return result[0] as T;
   }
 
   /**
@@ -41,13 +52,22 @@ export abstract class BaseRepository<T> {
     condition: any,
     errorMessage = MESSAGES.NOT_FOUND,
   ): Promise<T> {
-    const result = await this.db.select().from(table).where(condition).limit(1);
+    this.logger.log('Finding record with custom condition');
     
-    if (!result.length) {
-      throw new NotFoundException(errorMessage);
+    try {
+      const result = await this.db.select().from(table).where(condition).limit(1);
+      
+      if (!result.length) {
+        this.logger.warn('Record not found with custom condition');
+        throw new NotFoundException(errorMessage);
+      }
+      
+      this.logger.log('Record found successfully with custom condition');
+      return result[0] as T;
+    } catch (error) {
+      this.logger.error('Error finding record with custom condition', error.stack);
+      throw error;
     }
-    
-    return result[0] as T;
   }
 
   /**
@@ -57,8 +77,17 @@ export abstract class BaseRepository<T> {
     table: any,
     condition: any,
   ): Promise<T | null> {
-    const result = await this.db.select().from(table).where(condition).limit(1);
-    return result.length ? (result[0] as T) : null;
+    this.logger.log('Finding record with custom condition (nullable)');
+    
+    try {
+      const result = await this.db.select().from(table).where(condition).limit(1);
+      const found = result.length > 0;
+      this.logger.log(`Record ${found ? 'found' : 'not found'} with custom condition`);
+      return result.length ? (result[0] as T) : null;
+    } catch (error) {
+      this.logger.error('Error finding record with custom condition', error.stack);
+      throw error;
+    }
   }
 
   /**
@@ -68,14 +97,23 @@ export abstract class BaseRepository<T> {
     table: any,
     where?: any,
   ): Promise<number> {
-    let query = this.db.select({ count: count() }).from(table);
+    this.logger.log(`Counting records${where ? ' with condition' : ''}`);
     
-    if (where) {
-      query = (query as any).where(where);
+    try {
+      let query = this.db.select({ count: count() }).from(table);
+      
+      if (where) {
+        query = (query as any).where(where);
+      }
+      
+      const result = await query;
+      const recordCount = result[0]?.count || 0;
+      this.logger.log(`Found ${recordCount} records`);
+      return recordCount;
+    } catch (error) {
+      this.logger.error('Error counting records', error.stack);
+      throw error;
     }
-    
-    const result = await query;
-    return result[0]?.count || 0;
   }
 
   /**
