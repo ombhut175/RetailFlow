@@ -16,6 +16,24 @@ const nextConfig = {
   },
   experimental:{
     browserDebugInfoInTerminal: true,
+    // Enable faster refresh for hackathon development
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+  // Hackathon optimizations
+  swcMinify: true,
+  compiler: {
+    removeConsole: false, // Keep console logs for debugging
+  },
+  // Faster builds during development
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      // Faster rebuilds
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      }
+    }
+    return config
   },
   typedRoutes: true,
 }

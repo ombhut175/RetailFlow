@@ -7,6 +7,7 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   NEXLOG: '/nexlog',
   TESTING: '/testing',
+  COMPONENT_TESTING: '/component-testing',
   
   // Auth routes (using Next.js route groups)
   AUTH: {
@@ -42,6 +43,11 @@ export const NAV_ITEMS = [
     title: 'Testing Dashboard',
     href: ROUTES.TESTING,
     icon: 'beaker',
+  },
+  {
+    title: 'Component Testing',
+    href: ROUTES.COMPONENT_TESTING,
+    icon: 'bug',
   },
   {
     title: 'Style Guide',

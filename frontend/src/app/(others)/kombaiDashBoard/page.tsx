@@ -88,9 +88,9 @@ export default function KombaiDashboard() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/40">
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-100/30 dark:bg-indigo-900/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-100/30 dark:bg-purple-900/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-100/20 dark:bg-blue-900/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "4s" }} />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "4s" }} />
       </div>
 
       <div className="relative z-10 p-4 md:p-6 lg:p-8">
@@ -260,7 +260,7 @@ export default function KombaiDashboard() {
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: item.color }}
                         />
-                        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{item.name}</span>
+                        <span className="text-sm font-medium text-foreground">{item.name}</span>
                       </div>
                       <Badge variant={item.value >= item.target ? "default" : "destructive"} className="text-xs">
                         {item.value}%
@@ -294,7 +294,7 @@ export default function KombaiDashboard() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.9 + index * 0.1 }}
-                      className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors dark:bg-slate-800 dark:hover:bg-slate-700"
+                      className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted/70 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div
@@ -302,12 +302,12 @@ export default function KombaiDashboard() {
                           style={{ backgroundColor: `hsl(var(--chart-${(index % 5) + 1}))` }}
                         />
                         <div>
-                          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{item.source}</span>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">{item.percentage}% of total</div>
+                          <span className="text-sm font-medium text-foreground">{item.source}</span>
+                          <div className="text-xs text-muted-foreground">{item.percentage}% of total</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{item.visitors.toLocaleString()}</div>
+                        <div className="text-sm font-bold text-foreground">{item.visitors.toLocaleString()}</div>
                         <Badge variant="outline" className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
                           {item.growth}
                         </Badge>
@@ -351,13 +351,13 @@ export default function KombaiDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.6 }}
           >
-            <Card className="border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
+            <Card className="border-border bg-card shadow-2xl">
               <CardHeader className="pb-6">
                 <CardTitle className="flex items-center gap-3 text-xl">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-700">
-                    <Activity className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+                    <Activity className="h-5 w-5 text-primary" />
                   </div>
-                  <span className="text-slate-900 dark:text-slate-100">Detailed Analytics</span>
+                  <span className="text-card-foreground">Detailed Analytics</span>
                   <Badge variant="secondary" className="ml-auto">
                     <Star className="h-3 w-3 mr-1" />
                     Premium
@@ -366,20 +366,20 @@ export default function KombaiDashboard() {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="overview" className="space-y-6">
-                  <TabsList className="grid w-full grid-cols-4 bg-slate-100 dark:bg-slate-700">
-                    <TabsTrigger value="overview" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800">
+                  <TabsList className="grid w-full grid-cols-4 bg-muted">
+                    <TabsTrigger value="overview" className="data-[state=active]:bg-background">
                       <Monitor className="h-4 w-4 mr-2" />
                       Overview
                     </TabsTrigger>
-                    <TabsTrigger value="users" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800">
+                    <TabsTrigger value="users" className="data-[state=active]:bg-background">
                       <Users className="h-4 w-4 mr-2" />
                       Users
                     </TabsTrigger>
-                    <TabsTrigger value="revenue" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800">
+                    <TabsTrigger value="revenue" className="data-[state=active]:bg-background">
                       <DollarSign className="h-4 w-4 mr-2" />
                       Revenue
                     </TabsTrigger>
-                    <TabsTrigger value="performance" className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800">
+                    <TabsTrigger value="performance" className="data-[state=active]:bg-background">
                       <Zap className="h-4 w-4 mr-2" />
                       Performance
                     </TabsTrigger>
@@ -397,16 +397,16 @@ export default function KombaiDashboard() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 1 + index * 0.1 }}
-                          className="p-6 rounded-2xl bg-slate-50 border border-slate-200 dark:bg-slate-800 dark:border-slate-700"
+                          className="p-6 rounded-2xl bg-muted/50 border border-border"
                         >
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/20">
-                              <stat.icon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                              <stat.icon className="h-4 w-4 text-primary" />
                             </div>
-                            <h4 className="font-medium text-sm text-slate-900 dark:text-slate-100">{stat.title}</h4>
+                            <h4 className="font-medium text-sm text-foreground">{stat.title}</h4>
                           </div>
-                          <p className="text-2xl font-bold mb-1 text-slate-900 dark:text-slate-100">{stat.value}</p>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                          <p className="text-2xl font-bold mb-1 text-foreground">{stat.value}</p>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
                             <TrendingUp className="h-3 w-3 text-green-600 dark:text-green-400" />
                             {stat.change} from last week
                           </p>
@@ -418,7 +418,7 @@ export default function KombaiDashboard() {
                   <TabsContent value="users" className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-4">
-                        <h4 className="font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                        <h4 className="font-semibold flex items-center gap-2 text-foreground">
                           <Users className="h-4 w-4" />
                           User Segmentation
                         </h4>
@@ -428,16 +428,16 @@ export default function KombaiDashboard() {
                         </div>
                       </div>
                       <div className="space-y-4">
-                        <h4 className="font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                        <h4 className="font-semibold flex items-center gap-2 text-foreground">
                           <Smartphone className="h-4 w-4" />
                           Device Breakdown
                         </h4>
                         <div className="space-y-3">
                           {deviceData.map((device, index) => (
-                            <div key={device.device} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                              <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{device.device}</span>
+                            <div key={device.device} className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
+                              <span className="text-sm font-medium text-foreground">{device.device}</span>
                               <div className="flex items-center gap-2">
-                                <span className="text-sm text-slate-600 dark:text-slate-400">{device.users.toLocaleString()}</span>
+                                <span className="text-sm text-muted-foreground">{device.users.toLocaleString()}</span>
                                 <Badge variant="outline">{device.percentage}%</Badge>
                               </div>
                             </div>
@@ -450,7 +450,7 @@ export default function KombaiDashboard() {
                   <TabsContent value="revenue" className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-4">
-                        <h4 className="font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                        <h4 className="font-semibold flex items-center gap-2 text-foreground">
                           <DollarSign className="h-4 w-4" />
                           Revenue Streams
                         </h4>
@@ -460,25 +460,25 @@ export default function KombaiDashboard() {
                             { name: "Subscriptions", amount: "$18,500", percentage: 28 },
                             { name: "Services", amount: "$3,300", percentage: 5 },
                           ].map((item, index) => (
-                            <div key={item.name} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                              <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{item.name}</span>
+                            <div key={item.name} className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
+                              <span className="text-sm font-medium text-foreground">{item.name}</span>
                               <div className="text-right">
-                                <div className="text-sm font-bold text-slate-900 dark:text-slate-100">{item.amount}</div>
-                                <div className="text-xs text-slate-500 dark:text-slate-400">{item.percentage}%</div>
+                                <div className="text-sm font-bold text-foreground">{item.amount}</div>
+                                <div className="text-xs text-muted-foreground">{item.percentage}%</div>
                               </div>
                             </div>
                           ))}
                         </div>
                       </div>
                       <div className="space-y-4">
-                        <h4 className="font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                        <h4 className="font-semibold flex items-center gap-2 text-foreground">
                           <Award className="h-4 w-4" />
                           Key Metrics
                         </h4>
                         <div className="p-6 rounded-2xl bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800">
                           <div className="flex items-center gap-2 mb-2">
                             <Flame className="h-5 w-5 text-green-600 dark:text-green-400" />
-                            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Monthly Recurring Revenue</span>
+                            <span className="text-sm font-medium text-foreground">Monthly Recurring Revenue</span>
                           </div>
                           <p className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">$18,500</p>
                           <p className="text-sm text-green-600/80 dark:text-green-400/80">+8.3% from last month</p>
@@ -490,7 +490,7 @@ export default function KombaiDashboard() {
                   <TabsContent value="performance" className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-4">
-                        <h4 className="font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                        <h4 className="font-semibold flex items-center gap-2 text-foreground">
                           <Zap className="h-4 w-4" />
                           Core Web Vitals
                         </h4>
@@ -500,8 +500,8 @@ export default function KombaiDashboard() {
                             { metric: "First Input Delay", value: "45ms", status: "good" },
                             { metric: "Cumulative Layout Shift", value: "0.08", status: "needs-improvement" },
                           ].map((vital) => (
-                            <div key={vital.metric} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                              <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{vital.metric}</span>
+                            <div key={vital.metric} className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
+                              <span className="text-sm font-medium text-foreground">{vital.metric}</span>
                               <Badge variant={vital.status === "good" ? "default" : "destructive"}>
                                 {vital.value}
                               </Badge>
@@ -510,7 +510,7 @@ export default function KombaiDashboard() {
                         </div>
                       </div>
                       <div className="space-y-4">
-                        <h4 className="font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                        <h4 className="font-semibold flex items-center gap-2 text-foreground">
                           <Wifi className="h-4 w-4" />
                           System Health
                         </h4>

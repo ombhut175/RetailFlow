@@ -30,9 +30,9 @@ export function DashboardHeader() {
       className="relative"
     >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-indigo-50/50 via-purple-50/30 to-blue-50/50 rounded-2xl blur-3xl dark:from-indigo-950/20 dark:via-purple-950/10 dark:to-blue-950/20" />
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-2xl blur-3xl" />
       
-      <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between p-6 rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-800/80">
+      <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between p-6 rounded-2xl border-border bg-card/80 backdrop-blur-xl">
         <div className="space-y-3">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -40,15 +40,15 @@ export function DashboardHeader() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="flex items-center gap-3"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg dark:bg-indigo-500">
-              <Activity className="h-6 w-6 text-white" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-lg">
+              <Activity className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              <h1 className="text-3xl font-bold text-card-foreground">
                 Analytics Dashboard
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              <p className="text-muted-foreground flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
                 Monitor your key metrics and performance indicators
               </p>
             </div>
@@ -64,7 +64,7 @@ export function DashboardHeader() {
               <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse mr-2" />
               Live Data
             </Badge>
-            <Badge variant="secondary" className="bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300">
+            <Badge variant="secondary" className="bg-muted text-muted-foreground">
               <Calendar className="h-3 w-3 mr-1" />
               Last updated: {new Date().toLocaleDateString()}
             </Badge>
@@ -82,7 +82,7 @@ export function DashboardHeader() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="bg-white/50 backdrop-blur-sm hover:bg-white transition-all duration-300 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+            className="bg-background/50 backdrop-blur-sm hover:bg-background transition-all duration-300"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
@@ -91,7 +91,7 @@ export function DashboardHeader() {
           <Button
             variant="outline"
             size="sm"
-            className="bg-white/50 backdrop-blur-sm hover:bg-white transition-all duration-300 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+            className="bg-background/50 backdrop-blur-sm hover:bg-background transition-all duration-300"
           >
             <Download className="h-4 w-4" />
             Export
@@ -100,12 +100,12 @@ export function DashboardHeader() {
           <Button
             variant="ghost"
             size="icon"
-            className="bg-white/50 backdrop-blur-sm hover:bg-white transition-all duration-300 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+            className="bg-background/50 backdrop-blur-sm hover:bg-background transition-all duration-300"
           >
             <Settings className="h-4 w-4" />
           </Button>
           
-          <div className="h-8 w-px bg-slate-300 dark:bg-slate-600" />
+          <div className="h-8 w-px bg-border" />
           
           <ThemeToggle />
         </motion.div>

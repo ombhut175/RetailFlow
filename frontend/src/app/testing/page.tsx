@@ -110,6 +110,20 @@ export default function TestingPage() {
       
       <div className="container mx-auto px-6 py-8">
         <div className="mx-auto max-w-7xl space-y-8">
+        {/* Navigation to Comprehensive Testing */}
+        <div className="mb-6">
+          <Alert>
+            <Bug className="h-4 w-4" />
+            <AlertDescription>
+              Looking for comprehensive UI testing? Check out our{" "}
+              <a href="/component-testing" className="font-medium text-blue-600 hover:underline">
+                Component Testing Suite
+              </a>{" "}
+              for toast notifications, error handling, and third-party library testing.
+            </AlertDescription>
+          </Alert>
+        </div>
+
         {/* Header with Debug Controls */}
         <div className="flex items-center justify-between">
           <div>

@@ -12,6 +12,15 @@ interface ErrorHandlingOptions {
   fallbackMessage?: string;
   logToConsole?: boolean;
   suppressConsoleError?: boolean;
+  component?: string;
+  showDebugPanel?: boolean;
+}
+
+// Global reference to error manager (will be set by provider)
+let globalErrorManager: any = null;
+
+export function setGlobalErrorManager(errorManager: any) {
+  globalErrorManager = errorManager;
 }
 
 // Extract meaningful error message from any error type
@@ -87,6 +96,8 @@ export function handleError(error: unknown, options: ErrorHandlingOptions = {}) 
     fallbackMessage = ERROR_MESSAGES.SOMETHING_WENT_WRONG,
     logToConsole = true,
     suppressConsoleError = false,
+    component,
+    showDebugPanel
   } = options;
 
   const message = extractErrorMessage(error, fallbackMessage);
@@ -97,10 +108,26 @@ export function handleError(error: unknown, options: ErrorHandlingOptions = {}) 
       message,
       originalError: error,
       stack: error instanceof Error ? error.stack : undefined,
+      component
     });
   }
 
-  // Toast notification
+  // Use Error Manager if available (development mode)
+  if (globalErrorManager && process.env.NODE_ENV === 'development') {
+    try {
+      globalErrorManager.captureError(error, {
+        component,
+        showToast,
+        showDebugPanel,
+        silent: !showToast
+      });
+      return message; // Error manager handles display
+    } catch (e) {
+      console.warn('Error manager failed, falling back to basic handling:', e);
+    }
+  }
+
+  // Fallback to basic toast notification
   if (showToast) {
     toast.error(message);
   }

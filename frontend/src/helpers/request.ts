@@ -1,8 +1,16 @@
 import { toast } from 'sonner';
 import { HTTP_STATUS, API_MESSAGES } from '@/constants/string-const';
 import { apiClient } from '@/lib/api/apiClient';
-import { extractErrorMessage } from '@/helpers/errors';
+import { extractErrorMessage, setGlobalErrorManager } from '@/helpers/errors';
 import hackLog from '@/lib/logger';
+
+// Global reference to error manager for API errors
+let globalErrorManager: any = null;
+
+export function setRequestErrorManager(errorManager: any) {
+  globalErrorManager = errorManager;
+  setGlobalErrorManager(errorManager);
+}
 
 // Response interceptor for global error handling
 apiClient.interceptors.response.use(
@@ -13,6 +21,28 @@ apiClient.interceptors.response.use(
       return Promise.reject(error)
     }
 
+    // Use Error Manager if available (development mode)
+    if (globalErrorManager && process.env.NODE_ENV === 'development') {
+      try {
+        globalErrorManager.captureError(error, {
+          type: error.response ? 'backend' : 'network',
+          url: error.config?.url,
+          method: error.config?.method?.toUpperCase(),
+          statusCode: error.response?.status,
+          requestData: error.config?.data,
+          responseData: error.response?.data,
+          showToast: true,
+          // For simple POST errors, don't show debug panel automatically
+          showDebugPanel: error.config?.method?.toUpperCase() !== 'POST' || !error.response
+        });
+        return Promise.reject(error); // Still reject so calling code can handle
+      } catch (e) {
+        console.warn('Error manager failed in request interceptor:', e);
+        // Fall through to basic handling
+      }
+    }
+
+    // Fallback to basic error handling
     // Handle network/no-response errors
     if (!error.response) {
       toast.error(API_MESSAGES.NETWORK_ERROR)

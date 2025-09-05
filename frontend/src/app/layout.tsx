@@ -11,6 +11,9 @@ import { Toaster } from "sonner";
 import hackLog from "@/lib/logger";
 import "./globals.css";
 import { ServerHealthChecker } from "@/components/server-health-checker";
+import { DevTools } from "@/components/dev-tools";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorManagerProvider } from "@/components/error-manager";
 
 // Initialize logger on app start
 if (typeof window === 'undefined') {
@@ -33,21 +36,26 @@ export default function RootLayout({
 }>) {
   return <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased overflow-x-hidden ${GeistSans.variable} ${GeistMono.variable}`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="quodo-theme">
-          <ServerHealthChecker>
-            <AuthProvider>
-              <LoggerInit />
-              {children}
-              <Toaster 
-                richColors 
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                }}
-              />
-            </AuthProvider>
-          </ServerHealthChecker>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ErrorManagerProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="quodo-theme">
+              <ServerHealthChecker>
+                <AuthProvider>
+                  <LoggerInit />
+                  {children}
+                  <DevTools />
+                  <Toaster 
+                    richColors 
+                    position="top-right"
+                    toastOptions={{
+                      duration: 4000,
+                    }}
+                  />
+                </AuthProvider>
+              </ServerHealthChecker>
+            </ThemeProvider>
+          </ErrorManagerProvider>
+        </ErrorBoundary>
       </body>
     </html>;
 }

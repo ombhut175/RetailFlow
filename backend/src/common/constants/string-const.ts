@@ -22,6 +22,9 @@ export enum ENV {
   DATABASE_NAME = 'DATABASE_NAME',
   DATABASE_USER = 'DATABASE_USER',
   DATABASE_PASSWORD = 'DATABASE_PASSWORD',
+  
+  // AI Services
+  GEMINI_API_KEY = 'GEMINI_API_KEY',
 }
 
 // Common Messages
@@ -55,6 +58,15 @@ export enum MESSAGES {
   // Supabase
   SUPABASE_CONNECTION_ERROR = 'Failed to connect to database',
   SUPABASE_QUERY_ERROR = 'Database query failed',
+  
+  // AI Services
+  GEMINI_API_KEY_MISSING = 'Gemini API key is required',
+  GEMINI_REQUEST_FAILED = 'Failed to communicate with Gemini API',
+  GEMINI_API_ERROR = 'Gemini API error',
+  GEMINI_GENERATION_FAILED = 'AI content generation failed',
+  GEMINI_JSON_PARSE_FAILED = 'Failed to parse JSON from AI response',
+  INVALID_JSON_RESPONSE = 'Invalid JSON response from AI service',
+  JSON_PARSING_ERROR = 'Failed to parse JSON from text response',
 }
 
 // API Response Messages

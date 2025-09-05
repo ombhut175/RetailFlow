@@ -40,10 +40,10 @@ export function AnimatedProgress({
       className={cn("space-y-3", className)}
     >
       <div className="flex justify-between items-center">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">{label}</span>
+        <span className="text-sm font-medium text-foreground">{label}</span>
         {showPercentage && (
           <motion.span 
-            className="text-sm font-bold text-indigo-600 dark:text-indigo-400"
+            className="text-sm font-bold text-primary"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: delay + 0.5, type: "spring", stiffness: 200 }}
@@ -56,7 +56,7 @@ export function AnimatedProgress({
       <div className="relative">
         <Progress 
           value={animatedValue} 
-          className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner" 
+          className="h-3 bg-muted rounded-full overflow-hidden shadow-inner" 
         />
         
         {/* Animated glow effect */}
@@ -80,7 +80,7 @@ export function AnimatedProgress({
         {/* Shimmer effect */}
         <div className="absolute inset-0 rounded-full overflow-hidden">
           <motion.div
-            className="absolute inset-y-0 w-8 bg-gradient-to-r from-transparent via-white/30 to-transparent dark:via-slate-100/20"
+            className="absolute inset-y-0 w-8 bg-gradient-to-r from-transparent via-background/30 to-transparent"
             animate={{
               x: [-32, 200],
             }}
