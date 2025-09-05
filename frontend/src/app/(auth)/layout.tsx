@@ -4,17 +4,25 @@ import * as React from "react";
 import Link from "next/link";
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Sun, GraduationCap } from "lucide-react";
+import { Moon, Sun, GraduationCap, ArrowLeft } from "lucide-react";
+import { ROUTES } from "@/constants/routes";
+import hackLog from "@/lib/logger";
 
-// Layout for auth routes: wraps pages with ThemeProvider, animated header, and premium background
+// Simplified layout for auth routes: minimal header with back to home button
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  React.useEffect(() => {
+    hackLog.componentMount('AuthLayout', {
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+
   return (
     <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
       <div className="relative min-h-dvh bg-gradient-to-b from-white to-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:from-[#0B1020] dark:to-[#0A0F1D] dark:text-slate-100">
         {/* Background visuals */}
         <BackgroundAura />
 
-        {/* Header */}
+        {/* Minimal Header */}
         <Header />
 
         {/* Page container with subtle entrance */}
@@ -37,30 +45,36 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   );
 }
 
-// Header with brand, nav, and theme toggle
+// Minimal header with just brand and theme toggle
 function Header() {
   return (
     <header className="sticky top-0 z-20 w-full border-b border-black/5 bg-white/70 backdrop-blur-md transition-colors dark:border-white/10 dark:bg-[#0B1020]/60">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
-        <Link href="/login" className="group inline-flex items-center gap-2">
-          <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-indigo-500 via-violet-500 to-fuchsia-500 shadow-sm ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-105 dark:ring-white/10">
-            <GraduationCap className="h-5 w-5 text-white drop-shadow" />
-          </span>
-          <div className="flex flex-col leading-tight">
-            <span className="text-base font-semibold tracking-tight">Quodo</span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</span>
-          </div>
-        </Link>
-
-        <nav className="hidden items-center gap-6 md:flex">
-          <Link href="/login" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
-            Sign In
+        
+        {/* Back to Home + Brand */}
+        <div className="flex items-center gap-4">
+          <Link 
+            href={ROUTES.HOME} 
+            className="group inline-flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
           </Link>
-          <Link href="/signup" className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
-            Sign Up
+          
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+          
+          <Link href={ROUTES.HOME} className="group inline-flex items-center gap-2">
+            <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-indigo-500 via-violet-500 to-fuchsia-500 shadow-sm ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-105 dark:ring-white/10">
+              <GraduationCap className="h-5 w-5 text-white drop-shadow" />
+            </span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-base font-semibold tracking-tight">Quodo</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</span>
+            </div>
           </Link>
-        </nav>
+        </div>
 
+        {/* Just theme toggle - no auth navigation needed since user is already on auth pages */}
         <div className="flex items-center gap-3">
           <ModeToggle />
         </div>

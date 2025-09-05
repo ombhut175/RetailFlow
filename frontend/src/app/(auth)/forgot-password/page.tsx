@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import AuthCard, { Field, Input, SubmitButton, MutedLink } from "../_components/auth-card";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { useGuestProtection } from "@/components/auth/auth-provider";
+import { ROUTES } from "@/constants/routes";
 import hackLog from "@/lib/logger";
 
 export default function ForgotPasswordPage() {
@@ -87,7 +88,7 @@ export default function ForgotPasswordPage() {
           footer={
             <div className="space-x-1">
               <span>Remembered it?</span>
-              <MutedLink href="/login">Back to login</MutedLink>
+              <MutedLink href={ROUTES.AUTH.LOGIN}>Back to login</MutedLink>
             </div>
           }
         >

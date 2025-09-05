@@ -4,6 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ROUTES } from "@/constants/routes";
+import hackLog from "@/lib/logger";
 import {
   GraduationCap,
   Rocket,
@@ -34,6 +36,13 @@ type Feature = {
 };
 
 export default function LandingPage() {
+  React.useEffect(() => {
+    hackLog.componentMount('LandingPage', {
+      timestamp: new Date().toISOString(),
+      route: '/',
+    });
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-background to-muted/40 text-foreground antialiased">
       <BackgroundAura />
@@ -72,8 +81,8 @@ function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <GhostLink href="/quodo/login" className="hidden sm:inline-flex">Login</GhostLink>
-          <PrimaryLink href="/quodo/signup">Get started</PrimaryLink>
+          <GhostLink href={ROUTES.AUTH.LOGIN} className="hidden sm:inline-flex">Login</GhostLink>
+          <PrimaryLink href={ROUTES.AUTH.SIGNUP}>Get started</PrimaryLink>
           <ThemeToggle />
         </div>
       </div>
@@ -84,7 +93,7 @@ function Header() {
 function HeaderLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
-      href={href}
+      href={href as any}
       className="group relative rounded-md px-3 py-2 text-sm font-medium text-foreground/90 transition-colors hover:text-foreground"
     >
       <span className="relative z-10">{children}</span>
@@ -109,11 +118,11 @@ function Hero() {
           Quodo is the modern learning platform for ambitious learners. Follow curated roadmaps, track progress, and master skills with hands-on projects.
         </motion.p>
         <motion.div variants={item} className="mt-6 flex flex-wrap items-center gap-3">
-          <PrimaryLink href="/quodo/signup" className="gap-2">
+          <PrimaryLink href={ROUTES.AUTH.SIGNUP} className="gap-2">
             Start learning free
             <ArrowRight className="h-4 w-4" />
           </PrimaryLink>
-          <GhostLink href="/quodo/login" className="gap-2">
+          <GhostLink href={ROUTES.AUTH.LOGIN} className="gap-2">
             <PlayCircle className="h-4 w-4" />
             View demo
           </GhostLink>
@@ -314,11 +323,11 @@ function CTA() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 md:justify-end">
-            <PrimaryLink href="/quodo/signup" className="gap-2">
+            <PrimaryLink href={ROUTES.AUTH.SIGNUP} className="gap-2">
               Create free account
               <ArrowRight className="h-4 w-4" />
             </PrimaryLink>
-            <GhostLink href="/quodo/login">I already have an account</GhostLink>
+            <GhostLink href={ROUTES.AUTH.LOGIN}>I already have an account</GhostLink>
           </div>
         </div>
       </motion.div>
@@ -338,9 +347,9 @@ function Footer() {
           <span className="text-xs text-muted-foreground">© {new Date().getFullYear()}</span>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/quodo/login" className="link-underline-anim">Login</Link>
-          <Link href="/quodo/signup" className="link-underline-anim">Sign up</Link>
-          <Link href="/styleguide" className="link-underline-anim">Styleguide</Link>
+          <Link href={ROUTES.AUTH.LOGIN} className="link-underline-anim">Login</Link>
+          <Link href={ROUTES.AUTH.SIGNUP} className="link-underline-anim">Sign up</Link>
+          <Link href={ROUTES.STYLEGUIDE} className="link-underline-anim">Styleguide</Link>
         </div>
       </div>
     </footer>
@@ -375,7 +384,7 @@ function BackgroundAura() {
 function PrimaryLink({ href, className, children }: { href: string; className?: string; children: React.ReactNode }) {
   return (
     <Link
-      href={href}
+      href={href as any}
       className={[
         "group relative inline-flex h-11 items-center justify-center rounded-xl px-4 text-sm font-semibold text-white",
         "shadow-lg shadow-indigo-600/20 ring-1 ring-white/15",
@@ -402,7 +411,7 @@ function PrimaryLink({ href, className, children }: { href: string; className?: 
 function GhostLink({ href, className, children }: { href: string; className?: string; children: React.ReactNode }) {
   return (
     <Link
-      href={href}
+      href={href as any}
       className={[
         "relative inline-flex h-11 items-center justify-center rounded-xl px-4 text-sm font-semibold",
         "border border-border bg-card/60 text-foreground/90 hover:text-foreground",

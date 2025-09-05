@@ -778,7 +778,8 @@ STACK TRACE: [Include if error]
 Please help debug this issue. Provide:
 1. Root cause analysis
 2. Step-by-step fix
-3. Prevention tips
+3. Code examples
+4. Prevention tips
 `
   
   console.log('🤖 [AI-PROMPT]', prompt)
@@ -824,7 +825,7 @@ Please provide:
 - **🪝 [HOOK-EXEC]** - For hook problems
 - **🎨 [COMPONENT]** - For UI issues
 - **🤖 [AI-CONTEXT]** - Complete app context
-- **📊 [PERFORMANCE]** - For speed issues
+- **📊 [PERFORMANCE]** - Track performance issues
 
 ### **Emergency AI Debug:**
 ```javascript
@@ -864,133 +865,36 @@ const emergencyDebug = () => {
 // Add to window for easy access
 window.emergencyDebug = emergencyDebug
 ```
-```
-```
-
 ---
 
-## ⚡ Component Development
+## 🛂 Auth pages & related logic (frontend/src/app/(auth))
 
-### Component Rules:
-- **One responsibility** - Users, products, forms, etc.
-- **Use hooks** - Never call API directly
-- **Import constants** - All text from constants folder
-- **Handle loading/error** - Show appropriate states
+The repo contains a small auth area under `frontend/src/app/(auth)`; document the pages and supporting logic here so developers know where to look and what to change.
 
-### File Organization:
-- Keep components flat in `components/`
-- Use descriptive names: `UserList.tsx`, `ProductForm.tsx`
-- Co-locate related components if needed
+- `frontend/src/app/(auth)/layout.tsx` — Layout wrapper for all auth pages. Minimal header, theme toggle, background visuals and entrance animations. Logs mount with `hackLog.componentMount('AuthLayout', ...)`.
+- `frontend/src/app/(auth)/_components/auth-card.tsx` — Shared UI primitives used by auth pages: `AuthCard`, `Field`, `Input`, `PasswordInput`, `SubmitButton`, `MutedLink`. Provides motion, focus halos and small UX helpers.
+- `frontend/src/app/(auth)/login/page.tsx` — Login page. Uses `useAuthStore()` for `login`, `isLoginLoading`, `loginError`, and `clearErrors`. Uses `useGuestProtection()` to avoid rendering when authenticated. Validates form, logs events (`hackLog.formSubmit`, `hackLog.formValidation`), and redirects on success to `ROUTES.DASHBOARD`.
+- `frontend/src/app/(auth)/signup/page.tsx` — Signup page. Uses `useAuthStore()` for `signup`, `isSignupLoading`, `signupError`. Validates name/email/password/confirm, logs events and redirects to `ROUTES.AUTH.LOGIN` on success.
+- `frontend/src/app/(auth)/forgot-password/page.tsx` — Forgot-password page. Uses `useAuthStore()` for `forgotPassword`, validates email input, logs events and shows a sent confirmation UI.
 
----
+Related supporting logic used by the auth pages:
 
-## 🚨 Common Issues & Quick Fixes
+- `frontend/src/hooks/use-auth-store.ts` — Zustand-based auth store used across auth pages and app layout. Exposes actions like `login`, `signup`, `forgotPassword`, loading flags, and error state.
+- `frontend/src/components/auth/auth-provider.tsx` — Auth provider and helpers (`useAuthProtection`, `useGuestProtection`) that gate page rendering based on auth state.
+- `frontend/src/constants/routes.ts` — Central route constants (e.g. `ROUTES.AUTH.LOGIN`, `ROUTES.DASHBOARD`) used for navigation and redirects.
+- `frontend/src/lib/logger.ts` — `hackLog` used throughout auth pages for structured logs (`componentMount`, `formSubmit`, `formValidation`, `storeAction`, `error`). Follow the logger rules in this document when updating auth flows.
 
-### SWR Not Working:
-- Check if SWR provider is set up in app layout
-- Verify API endpoints in constants
-- Look for network errors in console
+Notes for contributors:
+- All API calls invoked by `useAuthStore` should follow the helpers rules: go through `@/helpers/request` and errors processed with `@/helpers/errors`.
+- Keep UI-only logic inside `_components/auth-card.tsx` and place business logic in hooks/stores/constants.
 
-### Zustand State Not Updating:
-- Always use functional updates for arrays
-- Check if you're subscribing correctly
-- Use store devtools for debugging
+## 🧩 Other pages with components (frontend/src/app/(other))
 
-### API Errors:
-- **🚨 Check helpers/request.ts** - All API calls must go here
-- **🚨 Check helpers/errors.ts** - All error processing here
-- **Verify API endpoints** - In constants, called through helpers/request
-- **Test with network tab** - But API calls through helpers only
+I couldn't find a `frontend/src/app/(other)` folder in this workspace. If you add pages that live under an `(other)` group, document them here using the same pattern as the auth section:
 
-### Component Not Re-rendering:
-- Add key props to lists
-- Check if state updates are immutable
-- Use React DevTools
+Example template to add:
 
----
+- `frontend/src/app/(other)/<page>/page.tsx` — Short description of the page and what components it uses.
+- `frontend/src/app/(other)/<page>/_components/...` — Reusable UI components for the page and where logic lives (hooks/stores/constants).
 
-## ✅ Pre-Demo Checklist
-
-### Code Quality:
-- [ ] All API endpoints in `constants/api.ts`
-- [ ] All messages in `constants/messages.ts`  
-- [ ] **🚨 ALL API calls use `helpers/request.ts`**
-- [ ] **🚨 ALL errors use `helpers/errors.ts`**
-- [ ] **🤖 DETAILED LOGGING everywhere** (API, errors, state changes)
-- [ ] Hooks are in `hooks/` folder
-- [ ] No hardcoded URLs or messages
-- [ ] **NO direct fetch() calls anywhere**
-- [ ] **NO inline error handling**
-- [ ] **AI debug panel** added to main components
-
-### Functionality:
-- [ ] Loading states work
-- [ ] Error messages are user-friendly
-- [ ] Can add/edit/delete data
-- [ ] **Console logs provide full context**
-- [ ] **Emergency debug function** available
-- [ ] Works on mobile
-
-### Demo Preparation:
-- [ ] Have test data ready
-- [ ] Prepare for network issues
-- [ ] **AI context logs** working
-- [ ] **Performance logs** show timing
-- [ ] Know how to reset state
-- [ ] Debug panels hidden
-- [ ] Backup plan ready
-
----
-
-## 🎪 Demo Day Tips
-
-### Before Demo:
-1. **Test everything** - Full user flow
-2. **Prepare fallback data** - If API fails
-3. **Have reset button** - Fresh start
-4. **Clear console** - No errors
-5. **Test offline** - Graceful degradation
-
-### During Demo:
-1. **Show, don't tell** - Let them use it
-2. **Have backup data** - Pre-populated examples
-3. **Know shortcuts** - Quick ways to show features
-4. **Stay calm** - Things will break
-5. **Focus on working parts** - Skip broken features
-
-### Emergency Fixes:
-- **Hard refresh** - Ctrl+F5 clears everything
-- **Use fallback data** - Better than empty screens
-- **Skip broken features** - Show what works
-- **Blame the network** - Classic excuse
-- **Have mobile ready** - Backup platform
-
----
-
-## 🏆 Success Formula
-
-**Folder Structure + Constants + Helpers + Hooks = Winning Hackathon Project**
-
-### Why This Works:
-- **Organized** - Easy to find and fix things
-- **Consistent** - Same patterns everywhere
-- **Debuggable** - Detailed logs for instant AI help
-- **AI-Friendly** - Full context in every log
-- **Scalable** - Add features without breaking
-- **Demo-ready** - Professional looking code
-
-### Final Reminders:
-- **🚨 USE THE FOLDERS** - constants, helpers, hooks, lib
-- **🚨 USE helpers/request.ts** - For ALL API calls (even with SWR)
-- **🚨 USE helpers/errors.ts** - For ALL error handling (even with Zustand)
-- **🤖 LOG EVERYTHING** - Detailed logs for AI assistance
-- **NO HARDCODING** - Everything through constants
-- **NO DIRECT FETCH** - Everything through helpers/request
-- **NO INLINE ERRORS** - Everything through helpers/errors
-- **🤖 COPY LOGS TO AI** - When stuck, paste console logs to AI
-- **📊 PERFORMANCE LOGS** - Track timing for optimization
-- **🚨 EMERGENCY DEBUG** - Use window.emergencyDebug() when broken
-- **LOG EVERYTHING** - Console logs save demos
-- **KEEP IT SIMPLE** - Working > perfect
-
-**Now go build something amazing! 🚀**
+If you want, I can scan for other top-level app folders (like `dashboard`, `testing`, etc.) and add them the same way.

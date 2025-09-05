@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import AuthCard, { Field, Input, PasswordInput, SubmitButton, MutedLink } from "../_components/auth-card";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { useGuestProtection } from "@/components/auth/auth-provider";
+import { ROUTES } from "@/constants/routes";
 import hackLog from "@/lib/logger";
 
 export default function LoginPage() {
@@ -67,12 +68,12 @@ export default function LoginPage() {
       if (success) {
         hackLog.storeAction('loginRedirect', {
           email,
-          redirectTo: '/dashboard',
+          redirectTo: ROUTES.DASHBOARD,
           component: 'LoginPage'
         });
         
         toast.success('Welcome back! Login successful.');
-        router.push("/dashboard");
+        router.push(ROUTES.DASHBOARD);
       }
       // If login failed, error is already in loginError from store
     } catch (error: any) {
@@ -106,7 +107,7 @@ export default function LoginPage() {
           footer={
             <div className="space-x-1">
               <span>New to Quodo?</span>
-              <MutedLink href="/signup">Create an account</MutedLink>
+              <MutedLink href={ROUTES.AUTH.SIGNUP}>Create an account</MutedLink>
             </div>
           }
         >
@@ -124,7 +125,7 @@ export default function LoginPage() {
                 <input type="checkbox" name="remember" className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
                 <span>Remember me</span>
               </label>
-              <MutedLink href="/forgot-password">Forgot password?</MutedLink>
+              <MutedLink href={ROUTES.AUTH.FORGOT_PASSWORD}>Forgot password?</MutedLink>
             </div>
 
             <SubmitButton type="submit" loading={isLoginLoading}>

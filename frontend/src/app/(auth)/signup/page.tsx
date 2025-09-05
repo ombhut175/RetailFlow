@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import AuthCard, { Field, Input, PasswordInput, SubmitButton, MutedLink } from "../_components/auth-card";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { useGuestProtection } from "@/components/auth/auth-provider";
+import { ROUTES } from "@/constants/routes";
 import hackLog from "@/lib/logger";
 
 export default function SignupPage() {
@@ -72,12 +73,12 @@ export default function SignupPage() {
       if (success) {
         hackLog.storeAction('signupRedirect', {
           email,
-          redirectTo: '/login',
+          redirectTo: ROUTES.AUTH.LOGIN,
           component: 'SignupPage'
         });
         
         toast.success('Account created successfully! Please log in.');
-        router.push("/login");
+        router.push(ROUTES.AUTH.LOGIN);
       }
       // If signup failed, error is already in signupError from store
     } catch (error: any) {
@@ -106,7 +107,7 @@ export default function SignupPage() {
           footer={
             <div className="space-x-1">
               <span>Already have an account?</span>
-              <MutedLink href="/login">Sign in</MutedLink>
+              <MutedLink href={ROUTES.AUTH.LOGIN}>Sign in</MutedLink>
             </div>
           }
         >

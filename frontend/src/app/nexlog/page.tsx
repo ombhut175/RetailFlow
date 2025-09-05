@@ -1,4 +1,5 @@
 import LoggerDemo from '@/components/logger-demo';
+import { AppNavigation } from '@/components/app-navigation';
 import hackLog from '@/lib/logger';
 
 /**
@@ -14,6 +15,8 @@ export default function LoggerPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AppNavigation />
+      
       <div className="container mx-auto py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">📝 Custom Logger Integration</h1>

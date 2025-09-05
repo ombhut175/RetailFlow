@@ -7,6 +7,7 @@
 
 import * as React from "react";
 import { useAuthStore } from "@/hooks/use-auth-store";
+import { ROUTES } from "@/constants/routes";
 import hackLog from "@/lib/logger";
 
 interface AuthProviderProps {
@@ -99,7 +100,7 @@ export function useAuthProtection(redirectTo: string = '/login') {
  * Hook to redirect authenticated users away from auth pages
  * Redirects to dashboard if already authenticated
  */
-export function useGuestProtection(redirectTo: string = '/dashboard') {
+export function useGuestProtection(redirectTo: string = ROUTES.DASHBOARD) {
   const { isAuthenticated, isLoading } = useAuthStore();
   
   React.useEffect(() => {

@@ -1,19 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { LogOut, User, Mail, Calendar, Shield } from "lucide-react";
-import { useAuthStore, useAuthUser } from "@/hooks/use-auth-store";
+import { User, Mail, Calendar, Shield, BookOpen, TrendingUp, Clock, Award } from "lucide-react";
+import { useAuthUser } from "@/hooks/use-auth-store";
 import { useAuthProtection } from "@/components/auth/auth-provider";
+import { AppNavigation } from "@/components/app-navigation";
 import hackLog from "@/lib/logger";
 
 export default function DashboardPage() {
-  const { logout, isLogoutLoading } = useAuthStore();
   const user = useAuthUser();
   const { shouldRender } = useAuthProtection();
-  const router = useRouter();
 
   React.useEffect(() => {
     hackLog.componentMount('DashboardPage', {
@@ -22,25 +19,6 @@ export default function DashboardPage() {
       isEmailVerified: user?.isEmailVerified
     });
   }, [user]);
-
-  const handleLogout = async () => {
-    hackLog.storeAction('userLogout', {
-      userId: user?.id,
-      trigger: 'user_action',
-      component: 'DashboardPage'
-    });
-
-    try {
-      await logout();
-      toast.success('Logged out successfully');
-      router.push('/login');
-    } catch (error: any) {
-      hackLog.error('Logout failed', {
-        error: error.message,
-        component: 'DashboardPage'
-      });
-    }
-  };
 
   // Don't render if user is not authenticated
   if (!shouldRender || !user) {
@@ -55,35 +33,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white/50 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/50">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                <Shield className="h-4 w-4" />
-              </div>
-              <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                Dashboard
-              </h1>
-            </div>
-
-            <button
-              onClick={handleLogout}
-              disabled={isLogoutLoading}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-            >
-              {isLogoutLoading ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-transparent"></div>
-              ) : (
-                <LogOut className="h-4 w-4" />
-              )}
-              {isLogoutLoading ? 'Logging out...' : 'Logout'}
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/40">
+      {/* App Navigation */}
+      <AppNavigation />
 
       {/* Main Content */}
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">

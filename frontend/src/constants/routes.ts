@@ -4,13 +4,15 @@
 export const ROUTES = {
   // Main pages
   HOME: '/',
+  DASHBOARD: '/dashboard',
+  NEXLOG: '/nexlog',
   TESTING: '/testing',
   
-  // Auth routes
+  // Auth routes (using Next.js route groups)
   AUTH: {
-    LOGIN: '/auth/login',
-    SIGNUP: '/auth/signup',
-    FORGOT_PASSWORD: '/auth/forgot-password',
+    LOGIN: '/login',
+    SIGNUP: '/signup', 
+    FORGOT_PASSWORD: '/forgot-password',
   },
   
   // Style guide and docs
@@ -24,17 +26,22 @@ export const ROUTES = {
   }
 } as const;
 
-// Navigation items for menus/sidebars
+// Navigation items for main authenticated app (post-login)
 export const NAV_ITEMS = [
   {
-    title: 'Home',
-    href: ROUTES.HOME,
+    title: 'Dashboard',
+    href: ROUTES.DASHBOARD,
     icon: 'home',
+  },
+  {
+    title: 'Nexlog',
+    href: ROUTES.NEXLOG,
+    icon: 'activity',
   },
   {
     title: 'Testing Dashboard',
     href: ROUTES.TESTING,
-    icon: 'activity',
+    icon: 'beaker',
   },
   {
     title: 'Style Guide',
@@ -42,3 +49,24 @@ export const NAV_ITEMS = [
     icon: 'palette',
   },
 ] as const;
+
+// Auth navigation items
+export const AUTH_NAV_ITEMS = [
+  {
+    title: 'Sign In',
+    href: ROUTES.AUTH.LOGIN,
+  },
+  {
+    title: 'Sign Up', 
+    href: ROUTES.AUTH.SIGNUP,
+  },
+  {
+    title: 'Forgot Password',
+    href: ROUTES.AUTH.FORGOT_PASSWORD,
+  },
+] as const;
+
+// Type definitions
+export type RouteValue = typeof ROUTES[keyof typeof ROUTES] | typeof ROUTES.AUTH[keyof typeof ROUTES.AUTH] | typeof ROUTES.API[keyof typeof ROUTES.API];
+export type NavItem = typeof NAV_ITEMS[number];
+export type AuthNavItem = typeof AUTH_NAV_ITEMS[number];

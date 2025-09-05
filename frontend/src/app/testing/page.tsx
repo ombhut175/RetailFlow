@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { AppNavigation } from "@/components/app-navigation";
+import hackLog from "@/lib/logger";
 import { 
   Activity, 
   Server, 
@@ -37,6 +39,13 @@ const FeatureIcons = {
 };
 
 export default function TestingPage() {
+  React.useEffect(() => {
+    hackLog.componentMount('TestingPage', {
+      route: '/testing',
+      timestamp: new Date().toISOString(),
+    });
+  }, []);
+
   console.log(`🚀 [${DEBUG_MESSAGES.COMPONENT_RENDERED}] TestingPage rendered`);
   
   // SWR hook for data fetching - FOLLOWS RULES
@@ -96,8 +105,11 @@ export default function TestingPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="min-h-screen bg-background">
+      <AppNavigation />
+      
+      <div className="container mx-auto px-6 py-8">
+        <div className="mx-auto max-w-7xl space-y-8">
         {/* Header with Debug Controls */}
         <div className="flex items-center justify-between">
           <div>
@@ -376,6 +388,7 @@ export default function TestingPage() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </div>
   );
