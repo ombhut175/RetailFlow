@@ -7,10 +7,10 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import LoggerInit from "@/components/logger-init";
-import { ServerHealthChecker } from "@/components/server-health-checker";
 import { Toaster } from "sonner";
 import hackLog from "@/lib/logger";
 import "./globals.css";
+import { ServerHealthChecker } from "@/components/server-health-checker";
 
 // Initialize logger on app start
 if (typeof window === 'undefined') {

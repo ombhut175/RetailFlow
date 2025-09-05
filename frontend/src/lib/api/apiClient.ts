@@ -32,7 +32,7 @@ function createBaseURL(): string {
 export const apiClient = axios.create({
   baseURL: createBaseURL(),
   withCredentials: true,
-  timeout: 10000, // 10 second timeout
+  timeout: 40000, // 40 second timeout
 });
 
 // Add request interceptor for debugging
