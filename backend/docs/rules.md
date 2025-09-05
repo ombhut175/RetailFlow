@@ -460,6 +460,94 @@ export class JwtAuthGuard implements CanActivate {
     }
   }
 }
+
+    ---
+
+    ## 🔐 AuthGuard & Auditing Rules (Project Standard)
+
+    These rules enforce consistent authentication and row-level auditing across the codebase.
+
+    1) Apply `AuthGuard` to every controller and route by default. Exceptions: testing, health-check, and `auth` controllers (these remain public for onboarding, health checks and login flows).
+
+    - Rationale: Keeps controllers thin and enforces consistent request-level authentication. Use `@UseGuards(AuthGuard)` at controller or route level. For global application, prefer using guards with an explicit exclude list for the exception controllers.
+
+    2) We use Supabase for authentication. All auth-related information (user id, email, metadata) should be retrieved via Supabase and accessed in handlers using the `@CurrentUser()` decorator provided in `src/common`. The `AuthGuard` must attach `{ id, email, supabaseUser }` to `request.user`.
+
+    3) Every new domain table MUST be created using Drizzle (no raw SQL migrations for app tables without a Drizzle schema). Each table must include the following audit columns:
+
+    ```ts
+    // common audit columns to include in every table
+    created_by uuid not null,       // FK -> users.id (user who created the row)
+    created_at timestamptz not null default now(),
+    updated_by uuid,               // FK -> users.id (user who last updated the row)
+    updated_at timestamptz,
+    deleted_by uuid,               // FK -> users.id (user who deleted the row)
+    deleted_at timestamptz,
+    ```
+
+    4) When performing create/update/delete operations in services or repositories, always set these fields from the current authenticated user. Use `@CurrentUser()` in controllers to obtain the `id` and pass it down to services. Example flow:
+
+    - Controller: `const user = await this.currentUser()` or `@CurrentUser('id') userId: string`
+    - Service: accept `actorId: string` parameter and set `created_by`, `updated_by`, `deleted_by` appropriately on DB operations
+
+    5) Enforce referential integrity: For audit columns that reference `users(id)` use foreign keys with cascading on update and delete.
+
+    - Example Drizzle definition (pseudocode):
+
+    ```ts
+    // when building Drizzle table: reference users table
+    created_by: uuid().notNull().references(() => users.id).onDelete('cascade').onUpdate('cascade'),
+    ```
+
+    Rationale: Cascade semantics keep audit history consistent when user records are removed or updated in developer flows. Be deliberate: in production you may prefer `SET NULL` for some domains — discuss if needed.
+
+    6) Implementation checklist for new tables and endpoints:
+
+    - [ ] Create table with Drizzle and include audit columns above
+    - [ ] Add Drizzle migration and run it
+    - [ ] Update repository/service to accept `actorId` and populate audit fields
+    - [ ] Add controller route protected by `AuthGuard` and propagate `@CurrentUser('id')` to service
+    - [ ] Add FK constraints to `users(id)` with `ON DELETE CASCADE, ON UPDATE CASCADE`
+
+    7) Logging & error handling
+
+    - Log create/update/delete operations with `actorId` and `requestId` for traceability.
+    - If `actorId` is missing when required, throw a `BadRequestException('Actor id required')` or `UnauthorizedException` depending on context.
+
+    ---
+
+    ## 🧾 CRUD Endpoints, Deletion Semantics & Data Access Rules
+
+    1) Deletion endpoints (required patterns)
+
+    - For every resource implement two delete endpoints:
+      - Soft delete: `DELETE /resource/:id` or `DELETE /api/resource/:id` — marks `deleted_at` and `deleted_by` but does NOT remove the row.
+      - Hard delete (purge): `DELETE /resource/:id/purge` or `DELETE /api/resource/:id/purge` — permanently removes the row from the table.
+
+    - Naming must be explicit: use `purge` for destructive permanent delete operations.
+
+    2) GET endpoints behavior with soft deletes
+
+    - By default `GET` endpoints should only return non-deleted rows (i.e., `deleted_at IS NULL`).
+    - Provide an optional query parameter for administrative endpoints to include deleted rows, e.g. `GET /resource?withDeleted=true`.
+    - For single-resource `GET /resource/:id` - return 404 if the row is soft-deleted (unless the caller explicitly requested deleted records).
+
+    3) Populating audit fields
+
+    - On CREATE: set `created_by = actorId`, `created_at = now()`
+    - On UPDATE: set `updated_by = actorId`, `updated_at = now()`
+    - On SOFT DELETE: set `deleted_by = actorId`, `deleted_at = now()`
+    - On HARD DELETE: remove row (and depending on domain, consider moving to an archival table before purge)
+
+    4) Supabase vs Drizzle usage rule (clarification)
+
+    - Use Supabase client only for auth-specific operations, buckets (storage) or Supabase-specific services (for example: Supabase Auth, Storage/Buckets, Realtime, GraphQL schema). Do NOT use Supabase client for application data table CRUD and queries.
+    - For all application data (public schema) operations, always use Drizzle ORM and generated migrations. This ensures type-safety, predictable migrations, and consistent query patterns.
+
+    5) If any of the above rules already exist elsewhere in this document, ignore duplicates; otherwise follow them strictly.
+
+    ---
+
 ```
 
 **Hackathon Benefits**:

@@ -10,7 +10,16 @@ This document defines **simplified rules** for rapid hackathon development with 
 
 ---
 
-## 📝 CUSTOM LOGGER Rules (MANDATORY!)
+## � Non-auth pages in `src/app/(others)`
+
+These are the current non-auth pages grouped under `src/app/(others)` in this project. Keep this list updated when you add or remove pages in that folder.
+
+- `/dashboard` — `src/app/(others)/dashboard/page.tsx` (main dashboard page)
+- `(group) layout` — `src/app/(others)/layout.tsx` (layout used for the grouped routes)
+
+Add new entries here for any additional non-auth pages you create in `src/app/(others)`.
+
+## �📝 CUSTOM LOGGER Rules (MANDATORY!)
 
 ### **🚀 Custom Logger Integration**
 - **✅ Implemented:** Custom hackathon-friendly logger in `@/lib/logger.ts`

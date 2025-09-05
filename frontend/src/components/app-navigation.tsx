@@ -6,27 +6,19 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ROUTES, NAV_ITEMS } from "@/constants/routes";
 import { ThemeToggle } from "./theme-toggle";
-import { useAuthStore } from "@/hooks/use-auth-store";
 import { Button } from "./ui/button";
-import { GraduationCap, LogOut } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import hackLog from "@/lib/logger";
 
 export function AppNavigation() {
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
 
   React.useEffect(() => {
     hackLog.componentMount('AppNavigation', {
       currentPath: pathname,
-      isAuthenticated: !!user,
+      authRemoved: true
     });
-  }, [pathname, user]);
-
-  const handleLogout = async () => {
-    hackLog.authLogout(user?.id);
-    await logout();
-    hackLog.routeChange(pathname, ROUTES.HOME);
-  };
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -67,35 +59,10 @@ export function AppNavigation() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           <ThemeToggle />
           
-          {user ? (
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">
-                Welcome, {user.email?.split('@')[0] || 'User'}
-              </span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleLogout}
-                className="flex items-center space-x-2"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <Link href={ROUTES.AUTH.LOGIN}>
-                <Button variant="ghost" size="sm">
-                  Sign in
-                </Button>
-              </Link>
-              <Link href={ROUTES.AUTH.SIGNUP}>
-                <Button size="sm">
-                  Sign up
-                </Button>
-              </Link>
-            </div>
-          )}
+          {/* Simplified navigation without auth state */}
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-muted-foreground">Demo Mode</span>
+          </div>
         </div>
       </div>
     </header>

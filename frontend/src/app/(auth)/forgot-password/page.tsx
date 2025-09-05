@@ -4,26 +4,18 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import AuthCard, { Field, Input, SubmitButton, MutedLink } from "../_components/auth-card";
-import { useAuthStore } from "@/hooks/use-auth-store";
-import { useGuestProtection } from "@/components/auth/auth-provider";
 import { ROUTES } from "@/constants/routes";
 import hackLog from "@/lib/logger";
 
 export default function ForgotPasswordPage() {
-  const { forgotPassword, isForgotPasswordLoading, forgotPasswordError, clearErrors } = useAuthStore();
-  const { shouldRender } = useGuestProtection();
   const [sent, setSent] = React.useState(false);
   const [formError, setFormError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     hackLog.componentMount('ForgotPasswordPage', {
-      hasForgotPasswordError: !!forgotPasswordError,
-      isLoading: isForgotPasswordLoading
+      authRemoved: true
     });
-
-    // Clear any previous errors when component mounts
-    clearErrors();
-  }, [clearErrors]);
+  }, []);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,7 +28,6 @@ export default function ForgotPasswordPage() {
 
     // Clear previous errors
     setFormError(null);
-    clearErrors();
 
     // Validate email
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -46,18 +37,14 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const success = await forgotPassword({ email });
+      // Demo: simulate sending password reset email
+      hackLog.storeAction('forgotPasswordSuccess', {
+        email,
+        component: 'ForgotPasswordPage'
+      });
       
-      if (success) {
-        hackLog.storeAction('forgotPasswordSuccess', {
-          email,
-          component: 'ForgotPasswordPage'
-        });
-        
-        setSent(true);
-        toast.success('Password reset email sent successfully!');
-      }
-      // If forgot password failed, error is already in forgotPasswordError from store
+      setSent(true);
+      toast.success('Demo mode: Password reset email simulation sent!');
     } catch (error: any) {
       hackLog.error('Forgot password submission failed', {
         error: error.message,
@@ -67,23 +54,18 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  // Display either form validation error or API error
-  const displayError = formError || forgotPasswordError;
-
-  // Don't render if user is already authenticated
-  if (!shouldRender) {
-    return null;
-  }
+  // Display form validation error
+  const displayError = formError;
 
   return (
     <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 md:grid-cols-2">
       <div className="order-2 md:order-1">
         <AuthCard
-          title={sent ? "Check your email" : "Reset your password"}
+          title={sent ? "Check your email (Demo)" : "Reset your password (Demo)"}
           subtitle={
             sent
-              ? "We've sent a reset link if an account exists for that address."
-              : "Enter your email and we'll send you a reset link."
+              ? "Demo: We've simulated sending a reset link."
+              : "Demo reset page - no actual email will be sent."
           }
           footer={
             <div className="space-x-1">
@@ -94,7 +76,7 @@ export default function ForgotPasswordPage() {
         >
           {sent ? (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-slate-600 dark:text-slate-300">
-              If you don't see the email in a few minutes, check your spam folder.
+              This is demo mode - no actual email was sent.
             </motion.div>
           ) : (
             <form className="grid gap-4" onSubmit={onSubmit}>
@@ -102,7 +84,7 @@ export default function ForgotPasswordPage() {
                 <Input name="email" type="email" inputMode="email" placeholder="you@school.edu" autoComplete="email" required />
               </Field>
 
-              <SubmitButton type="submit" loading={isForgotPasswordLoading}>
+              <SubmitButton type="submit" loading={false}>
                 Send reset link
               </SubmitButton>
             </form>

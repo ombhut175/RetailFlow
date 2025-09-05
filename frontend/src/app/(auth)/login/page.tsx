@@ -6,26 +6,18 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import AuthCard, { Field, Input, PasswordInput, SubmitButton, MutedLink } from "../_components/auth-card";
-import { useAuthStore } from "@/hooks/use-auth-store";
-import { useGuestProtection } from "@/components/auth/auth-provider";
 import { ROUTES } from "@/constants/routes";
 import hackLog from "@/lib/logger";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoginLoading, loginError, clearErrors } = useAuthStore();
-  const { shouldRender } = useGuestProtection();
   const [formErrors, setFormErrors] = React.useState<{ email?: string; password?: string } | null>(null);
 
   React.useEffect(() => {
     hackLog.componentMount('LoginPage', {
-      hasLoginError: !!loginError,
-      isLoading: isLoginLoading
+      authRemoved: true
     });
-
-    // Clear any previous errors when component mounts
-    clearErrors();
-  }, [clearErrors]);
+  }, []);
 
   function validate(form: FormData) {
     const email = String(form.get("email") || "").trim();
@@ -53,7 +45,6 @@ export default function LoginPage() {
 
     // Clear previous errors
     setFormErrors(null);
-    clearErrors();
 
     // Check for validation errors
     if (Object.keys(nextErrors).length) {
@@ -63,19 +54,15 @@ export default function LoginPage() {
     }
 
     try {
-      const success = await login({ email, password });
+      // Demo: simulate successful login without actual authentication
+      hackLog.storeAction('loginRedirect', {
+        email,
+        redirectTo: ROUTES.DASHBOARD,
+        component: 'LoginPage'
+      });
       
-      if (success) {
-        hackLog.storeAction('loginRedirect', {
-          email,
-          redirectTo: ROUTES.DASHBOARD,
-          component: 'LoginPage'
-        });
-        
-        toast.success('Welcome back! Login successful.');
-        router.push(ROUTES.DASHBOARD);
-      }
-      // If login failed, error is already in loginError from store
+      toast.success('Demo mode: Login simulation successful.');
+      router.push(ROUTES.DASHBOARD);
     } catch (error: any) {
       hackLog.error('Login submission failed', {
         error: error.message,
@@ -85,13 +72,8 @@ export default function LoginPage() {
     }
   }
 
-  // Don't render if user is already authenticated
-  if (!shouldRender) {
-    return null;
-  }
-
-  // Display either form validation errors or API errors
-  const displayErrors = formErrors || (loginError ? { password: loginError } : null);
+  // Display form validation errors
+  const displayErrors = formErrors;
 
   return (
     <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 md:grid-cols-2">
@@ -102,8 +84,8 @@ export default function LoginPage() {
         className="order-2 md:order-1"
       >
         <AuthCard
-          title="Welcome back"
-          subtitle="Access your personalized learning dashboard"
+          title="Welcome back (Demo)"
+          subtitle="Demo login page - no authentication required"
           footer={
             <div className="space-x-1">
               <span>New to Quodo?</span>
@@ -128,7 +110,7 @@ export default function LoginPage() {
               <MutedLink href={ROUTES.AUTH.FORGOT_PASSWORD}>Forgot password?</MutedLink>
             </div>
 
-            <SubmitButton type="submit" loading={isLoginLoading}>
+            <SubmitButton type="submit" loading={false}>
               Continue
             </SubmitButton>
 
