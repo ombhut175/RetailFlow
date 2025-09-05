@@ -6,18 +6,25 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import AuthCard, { Field, Input, PasswordInput, SubmitButton, MutedLink } from "../_components/auth-card";
-import { ROUTES } from "@/constants/routes";
+import { useAuthStore } from "@/hooks/use-auth-store";
+import { useGuestProtection } from "@/components/auth/auth-provider";
 import hackLog from "@/lib/logger";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, isLoginLoading, loginError, clearErrors } = useAuthStore();
+  const { shouldRender } = useGuestProtection();
   const [formErrors, setFormErrors] = React.useState<{ email?: string; password?: string } | null>(null);
 
   React.useEffect(() => {
     hackLog.componentMount('LoginPage', {
-      authRemoved: true
+      hasLoginError: !!loginError,
+      isLoading: isLoginLoading
     });
-  }, []);
+
+    // Clear any previous errors when component mounts
+    clearErrors();
+  }, [clearErrors]);
 
   function validate(form: FormData) {
     const email = String(form.get("email") || "").trim();
@@ -45,6 +52,7 @@ export default function LoginPage() {
 
     // Clear previous errors
     setFormErrors(null);
+    clearErrors();
 
     // Check for validation errors
     if (Object.keys(nextErrors).length) {
@@ -54,15 +62,19 @@ export default function LoginPage() {
     }
 
     try {
-      // Demo: simulate successful login without actual authentication
-      hackLog.storeAction('loginRedirect', {
-        email,
-        redirectTo: ROUTES.DASHBOARD,
-        component: 'LoginPage'
-      });
+      const success = await login({ email, password });
       
-      toast.success('Demo mode: Login simulation successful.');
-      router.push(ROUTES.DASHBOARD);
+      if (success) {
+        hackLog.storeAction('loginRedirect', {
+          email,
+          redirectTo: '/dashboard',
+          component: 'LoginPage'
+        });
+        
+        toast.success('Welcome back! Login successful.');
+        router.push("/dashboard");
+      }
+      // If login failed, error is already in loginError from store
     } catch (error: any) {
       hackLog.error('Login submission failed', {
         error: error.message,
@@ -72,8 +84,13 @@ export default function LoginPage() {
     }
   }
 
-  // Display form validation errors
-  const displayErrors = formErrors;
+  // Don't render if user is already authenticated
+  if (!shouldRender) {
+    return null;
+  }
+
+  // Display either form validation errors or API errors
+  const displayErrors = formErrors || (loginError ? { password: loginError } : null);
 
   return (
     <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 md:grid-cols-2">
@@ -84,12 +101,12 @@ export default function LoginPage() {
         className="order-2 md:order-1"
       >
         <AuthCard
-          title="Welcome back (Demo)"
-          subtitle="Demo login page - no authentication required"
+          title="Welcome back"
+          subtitle="Access your personalized learning dashboard"
           footer={
             <div className="space-x-1">
               <span>New to Quodo?</span>
-              <MutedLink href={ROUTES.AUTH.SIGNUP}>Create an account</MutedLink>
+              <MutedLink href="/signup">Create an account</MutedLink>
             </div>
           }
         >
@@ -107,10 +124,10 @@ export default function LoginPage() {
                 <input type="checkbox" name="remember" className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
                 <span>Remember me</span>
               </label>
-              <MutedLink href={ROUTES.AUTH.FORGOT_PASSWORD}>Forgot password?</MutedLink>
+              <MutedLink href="/forgot-password">Forgot password?</MutedLink>
             </div>
 
-            <SubmitButton type="submit" loading={false}>
+            <SubmitButton type="submit" loading={isLoginLoading}>
               Continue
             </SubmitButton>
 

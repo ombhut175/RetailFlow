@@ -4,18 +4,25 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import AuthCard, { Field, Input, PasswordInput, SubmitButton, MutedLink } from "../_components/auth-card";
-import { ROUTES } from "@/constants/routes";
+import { useAuthStore } from "@/hooks/use-auth-store";
+import { useGuestProtection } from "@/components/auth/auth-provider";
 import hackLog from "@/lib/logger";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { signup, isSignupLoading, signupError, clearErrors } = useAuthStore();
+  const { shouldRender } = useGuestProtection();
   const [formErrors, setFormErrors] = React.useState<{ name?: string; email?: string; password?: string; confirm?: string } | null>(null);
 
   React.useEffect(() => {
     hackLog.componentMount('SignupPage', {
-      authRemoved: true
+      hasSignupError: !!signupError,
+      isLoading: isSignupLoading
     });
-  }, []);
+
+    // Clear any previous errors when component mounts
+    clearErrors();
+  }, [clearErrors]);
 
   function validate(form: FormData) {
     const name = String(form.get("name") || "").trim();
@@ -49,6 +56,7 @@ export default function SignupPage() {
 
     // Clear previous errors
     setFormErrors(null);
+    clearErrors();
 
     // Check for validation errors
     if (Object.keys(nextErrors).length) {
@@ -58,15 +66,20 @@ export default function SignupPage() {
     }
 
     try {
-      // Demo: simulate successful signup without actual registration
-      hackLog.storeAction('signupRedirect', {
-        email,
-        redirectTo: ROUTES.AUTH.LOGIN,
-        component: 'SignupPage'
-      });
+      // Backend signup only needs email and password (name is not in the DTO)
+      const success = await signup({ email, password });
       
-      toast.success('Demo mode: Account creation simulation successful!');
-      router.push(ROUTES.AUTH.LOGIN);
+      if (success) {
+        hackLog.storeAction('signupRedirect', {
+          email,
+          redirectTo: '/login',
+          component: 'SignupPage'
+        });
+        
+        toast.success('Account created successfully! Please log in.');
+        router.push("/login");
+      }
+      // If signup failed, error is already in signupError from store
     } catch (error: any) {
       hackLog.error('Signup submission failed', {
         error: error.message,
@@ -76,19 +89,24 @@ export default function SignupPage() {
     }
   }
 
-  // Display form validation errors
-  const displayErrors = formErrors;
+  // Display either form validation errors or API errors
+  const displayErrors = formErrors || (signupError ? { email: signupError } : null);
+
+  // Don't render if user is already authenticated
+  if (!shouldRender) {
+    return null;
+  }
 
   return (
     <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 md:grid-cols-2">
       <div className="order-2 md:order-1">
         <AuthCard
-          title="Create your account (Demo)"
-          subtitle="Demo signup page - no registration required"
+          title="Create your account"
+          subtitle="Join thousands of learners accelerating their careers"
           footer={
             <div className="space-x-1">
               <span>Already have an account?</span>
-              <MutedLink href={ROUTES.AUTH.LOGIN}>Sign in</MutedLink>
+              <MutedLink href="/login">Sign in</MutedLink>
             </div>
           }
         >
@@ -114,7 +132,7 @@ export default function SignupPage() {
               <span>I agree to the Terms and Privacy Policy</span>
             </label>
 
-            <SubmitButton type="submit" loading={false}>
+            <SubmitButton type="submit" loading={isSignupLoading}>
               Create account
             </SubmitButton>
           </form>

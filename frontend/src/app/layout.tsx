@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import LoggerInit from "@/components/logger-init";
+import { ServerHealthChecker } from "@/components/server-health-checker";
 import { Toaster } from "sonner";
 import hackLog from "@/lib/logger";
 import "./globals.css";
@@ -33,17 +34,19 @@ export default function RootLayout({
   return <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased overflow-x-hidden ${GeistSans.variable} ${GeistMono.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="quodo-theme">
-          <AuthProvider>
-            <LoggerInit />
-            {children}
-            <Toaster 
-              richColors 
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-              }}
-            />
-          </AuthProvider>
+          <ServerHealthChecker>
+            <AuthProvider>
+              <LoggerInit />
+              {children}
+              <Toaster 
+                richColors 
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                }}
+              />
+            </AuthProvider>
+          </ServerHealthChecker>
         </ThemeProvider>
       </body>
     </html>;

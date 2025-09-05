@@ -506,5 +506,71 @@ export class AuthController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Check if User is Logged In',
+    description: 'Check if the current user is authenticated. Returns true if user has valid authentication cookie, false otherwise.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Authentication status checked successfully',
+    schema: {
+      example: {
+        statusCode: 200,
+        success: true,
+        message: 'Authentication status checked',
+        data: {
+          isLoggedIn: true,
+          user: {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            email: 'john.doe@example.com',
+          }
+        },
+      },
+    },
+  })
+  @Get('isLoggedIn')
+  async isLoggedIn(@Req() request: Request) {
+    this.logger.log('Check logged in status request received');
+    
+    const token = request.cookies[COOKIES.AUTH_TOKEN];
+    
+    if (!token) {
+      this.logger.log('No auth token found - user not logged in');
+      return successResponse(
+        {
+          isLoggedIn: false,
+          user: null,
+        },
+        'User not logged in'
+      );
+    }
+
+    try {
+      const user = await this.authService.getCurrentUser(token);
+      
+      this.logger.log(`User ${user.email} is logged in`);
+
+      return successResponse(
+        {
+          isLoggedIn: true,
+          user: {
+            id: user.id,
+            email: user.email,
+          },
+        },
+        'User is logged in'
+      );
+    } catch (error) {
+      this.logger.warn('Invalid auth token - user not logged in', error.message);
+      return successResponse(
+        {
+          isLoggedIn: false,
+          user: null,
+        },
+        'User not logged in'
+      );
+    }
+  }
+
   //#endregion
 }

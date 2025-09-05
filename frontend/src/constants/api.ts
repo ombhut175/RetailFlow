@@ -3,6 +3,11 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost
 
 // Testing API Endpoints (relative URLs - prefix handled by apiClient)
 export const API_ENDPOINTS = {
+  // Health endpoints
+  HEALTH: {
+    STATUS: 'health-check/status', // Server health check endpoint
+  },
+  
   // Test endpoints
   TESTING: {
     DATA: 'test/testing', // 🚨 Relative URL - prefix added by apiClient

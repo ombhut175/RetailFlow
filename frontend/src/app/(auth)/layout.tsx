@@ -2,19 +2,54 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { Moon, Sun, GraduationCap, ArrowLeft } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/hooks/useAuth";
 import hackLog from "@/lib/logger";
 
 // Simplified layout for auth routes: minimal header with back to home button
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn, isLoading } = useAuth();
+  const router = useRouter();
+
   React.useEffect(() => {
     hackLog.componentMount('AuthLayout', {
       timestamp: new Date().toISOString(),
     });
   }, []);
+
+  React.useEffect(() => {
+    // If user is logged in, redirect to dashboard
+    if (isLoggedIn === true) {
+      hackLog.info('User is logged in, redirecting to dashboard from auth layout');
+      router.push(ROUTES.DASHBOARD);
+    }
+  }, [isLoggedIn, router]);
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-slate-600 dark:text-slate-300">
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+  // If user is logged in, don't render auth form (redirect is happening)
+  if (isLoggedIn === true) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-slate-600 dark:text-slate-300">
+          Redirecting to dashboard...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
