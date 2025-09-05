@@ -1707,6 +1707,64 @@ export class UserService {
 
 ---
 
+## 🔒 Rules for "it" — AuthGuard, Auditing & Deletion (Enforceable)
+
+This concise section codifies the expected behavior for the AuthGuard, row-level auditing, deletion semantics (soft/hard), and migration workflow. Treat this as the canonical checklist teams and CI should enforce.
+
+1) Scope & Applicability
+- Apply the project's `AuthGuard` to every API route and controller by default. Exceptions: `health`, `auth` and dedicated `test` endpoints. Any new controller must explicitly document if it is public.
+
+2) Token handling
+- AuthGuard must extract tokens in order: `Authorization: Bearer <token>` then cookie fallback (cookie name must come from the project's string constant). Do not parse or validate JWT yourself — use the Supabase client via `SupabaseService`.
+
+3) Current user propagation
+- The AuthGuard must attach an object on `request.user` containing at least `{ id: string, email?: string, supabaseUser?: any }`.
+- Use the `@CurrentUser()` decorator in controllers to retrieve `id` and pass it as `actorId` into services.
+
+4) Auditing columns (required on every domain table)
+- Every Drizzle-managed table MUST include these audit columns:
+  - `created_by uuid NOT NULL` (FK → `users.id`)
+  - `created_at timestamptz NOT NULL DEFAULT now()`
+  - `updated_by uuid` (FK → `users.id`)
+  - `updated_at timestamptz`
+  - `deleted_by uuid` (FK → `users.id`)
+  - `deleted_at timestamptz`
+- Foreign keys must use cascade semantics in dev (ON UPDATE/DELETE CASCADE) unless a domain-specific rationale exists; document exceptions.
+
+5) Audit population rules
+- Controller: obtain actorId via `@CurrentUser('id')` and pass to service.
+- Service/Repository: accept `actorId` and set audit fields on create/update/delete:
+  - CREATE → set `created_by = actorId`, `created_at = now()`
+  - UPDATE → set `updated_by = actorId`, `updated_at = now()`
+  - SOFT DELETE → set `deleted_by = actorId`, `deleted_at = now()`
+
+6) Deletion endpoints (required)
+- Soft delete: `DELETE /resource/:id` — set `deleted_at` and `deleted_by` only.
+- Hard delete (purge): `DELETE /resource/:id/purge` — permanently remove the row.
+- All GET/list endpoints must return only non-deleted rows by default (i.e., `deleted_at IS NULL`). Support `?withDeleted=true` for admin use.
+
+7) Data access rule: Drizzle first
+- Use Supabase client only for Auth and Storage. Use Drizzle ORM for all application data queries, updates, and migrations.
+
+8) Migrations & safety
+- Generate migrations from Drizzle schema (TS) and commit the generated SQL. Review every generated migration before applying.
+- Never hand-edit migrations that have already been applied in other environments. If you must, create a new migration that corrects the issue.
+- Prefer idempotent DDL where appropriate (e.g., `CREATE TABLE IF NOT EXISTS`) or guard destructive statements with existence checks so migrations can be replayed safely in development.
+
+9) PR & CI enforcement (recommended)
+- CI should fail the build when:
+  - A new table lacks audit columns.
+  - A controller exposing write operations is unprotected by `AuthGuard` (except documented exceptions).
+  - Migrations are missing for new Drizzle schema changes.
+- Add a simple linter/test that scans new Drizzle schemas for required audit columns and flags violations.
+
+10) Operational notes
+- Log create/update/delete operations with `actorId` and correlation/request id.
+- If `actorId` is required but missing, throw `BadRequestException('Actor id required')` or `UnauthorizedException` depending on the callsite.
+
+Use this section as the short-source-of-truth for reviewers and automation. If you want, I can add a small CI job that scans `src/core/database/schema/**` for missing audit columns and fails PRs automatically.
+
+
 ## 🧵 24. Queues with BullMQ (Best Practices)
 
 - **Configuration**

@@ -1,4 +1,4 @@
-CREATE TABLE "health_checking" (
+CREATE TABLE IF NOT EXISTS "health_checking" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"service" text NOT NULL,
 	"status" text NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE "health_checking" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"email" text NOT NULL,
 	"is_email_verified" boolean DEFAULT false NOT NULL,
