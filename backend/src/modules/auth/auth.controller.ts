@@ -133,15 +133,16 @@ export class AuthController {
       
       // Set never-expiring cookie with the access token
       if (result.session?.access_token) {
+        const isProduction = process.env.NODE_ENV === 'production';
         const cookieOptions: any = {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-          // No maxAge or expires means the cookie never expires (session cookie that persists)
+          secure: isProduction, // Only secure in production (HTTPS required)
+          sameSite: isProduction ? 'none' : 'lax', // 'none' for cross-domain in production
+          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
         };
 
         // Set domain for production if COOKIE_DOMAIN is provided
-        if (process.env.NODE_ENV === 'production' && process.env[ENV.COOKIE_DOMAIN]) {
+        if (isProduction && process.env[ENV.COOKIE_DOMAIN]) {
           cookieOptions.domain = process.env[ENV.COOKIE_DOMAIN];
         }
 
@@ -395,14 +396,15 @@ export class AuthController {
       this.logger.log(`Logout request for user: ${user.email} (ID: ${user.id})`);
 
       // Clear the authentication cookie
+      const isProduction = process.env.NODE_ENV === 'production';
       const clearCookieOptions: any = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
       };
 
       // Set domain for production if COOKIE_DOMAIN is provided
-      if (process.env.NODE_ENV === 'production' && process.env[ENV.COOKIE_DOMAIN]) {
+      if (isProduction && process.env[ENV.COOKIE_DOMAIN]) {
         clearCookieOptions.domain = process.env[ENV.COOKIE_DOMAIN];
       }
 

@@ -4,20 +4,25 @@ import hackLog from "@/lib/logger";
 
 // Simple function to get environment variable with fallback
 function getApiUrl(): string {
-  if (typeof window !== 'undefined') {
-    // Client-side: Use fallback URL due to Next.js 15 + Turbopack bug
-    hackLog.warn('CLIENT] Using fallback API URL due to Turbopack environment variable issue');
-    return 'http://localhost:5099';
-  } else {
-    // Server-side: Try to get the actual environment variable
-    const envUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (envUrl) {
-      hackLog.info('SERVER] Using environment API URL', { envUrl });
-      return envUrl;
+  // Try to get the environment variable first (works both client and server side)
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  
+  if (envUrl) {
+    if (typeof window !== 'undefined') {
+      hackLog.info('[CLIENT] Using environment API URL', { envUrl });
     } else {
-      hackLog.warn('[SERVER] Environment variable not found, using fallback');
-      return 'http://localhost:5099';
+      hackLog.info('[SERVER] Using environment API URL', { envUrl });
     }
+    return envUrl;
+  } else {
+    // Fallback only for development
+    const fallbackUrl = 'http://localhost:5099';
+    if (typeof window !== 'undefined') {
+      hackLog.warn('[CLIENT] Environment variable not found, using fallback', { fallbackUrl });
+    } else {
+      hackLog.warn('[SERVER] Environment variable not found, using fallback', { fallbackUrl });
+    }
+    return fallbackUrl;
   }
 }
 
@@ -58,8 +63,11 @@ apiClient.interceptors.request.use(
     console.log("API Request:", {
       url: config.url,
       method: config.method,
+      baseURL: config.baseURL,
+      fullUrl: `${config.baseURL}/${config.url}`,
       data: config.data,
-      headers: config.headers
+      headers: config.headers,
+      withCredentials: config.withCredentials
     });
     return config;
   },
