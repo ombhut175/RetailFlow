@@ -32,13 +32,6 @@ interface PurchaseOrderFormProps {
   onCancel: () => void;
 }
 
-// Mock suppliers data - Replace with real API call
-const mockSuppliers = [
-  { id: '1', name: 'Tech Supplies Co.', contact_person: 'John Smith', email: 'john@techsupplies.com' },
-  { id: '2', name: 'Office Solutions Ltd.', contact_person: 'Jane Doe', email: 'jane@officesolutions.com' },
-  { id: '3', name: 'Industrial Parts Inc.', contact_person: 'Mike Johnson', email: 'mike@industrialparts.com' }
-];
-
 export function PurchaseOrderForm({ 
   initialData, 
   onSubmit, 
@@ -59,7 +52,9 @@ export function PurchaseOrderForm({
   const [errors, setErrors] = useState<PurchaseOrderFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [loadingSuppliers, setLoadingSuppliers] = useState(false);
 
   // Component mount logging
   useEffect(() => {
@@ -68,6 +63,10 @@ export function PurchaseOrderForm({
       orderId: initialData?.id,
       timestamp: new Date().toISOString()
     });
+
+    // Load data on mount
+    loadProducts();
+    loadSuppliers();
   }, [initialData]);
 
   // Initialize form with existing data
@@ -119,8 +118,33 @@ export function PurchaseOrderForm({
     }
   };
 
+  // Load suppliers
+  const loadSuppliers = async () => {
+    setLoadingSuppliers(true);
+    try {
+      const suppliersData = await suppliersApi.getActiveSuppliers();
+      setSuppliers(suppliersData);
+      hackLog.dev('Suppliers loaded for purchase order form', {
+        count: suppliersData.length
+      });
+    } catch (error: any) {
+      hackLog.error('Failed to load suppliers', {
+        error: error.message,
+        component: 'PurchaseOrderForm'
+      });
+      toast({
+        title: "Error loading suppliers",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingSuppliers(false);
+    }
+  };
+
   useEffect(() => {
     loadProducts();
+    loadSuppliers();
   }, []);
 
   // Validation
@@ -357,11 +381,15 @@ export function PurchaseOrderForm({
                 <SelectValue placeholder="Select supplier" />
               </SelectTrigger>
               <SelectContent>
-                {mockSuppliers.map(supplier => (
-                  <SelectItem key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </SelectItem>
-                ))}
+                {loadingSuppliers ? (
+                  <SelectItem value="loading" disabled>Loading suppliers...</SelectItem>
+                ) : (
+                  suppliers.map(supplier => (
+                    <SelectItem key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             {errors.supplier_id && (
@@ -477,7 +505,7 @@ export function PurchaseOrderForm({
                             </SelectTrigger>
                             <SelectContent>
                               {loadingProducts ? (
-                                <SelectItem value="" disabled>Loading products...</SelectItem>
+                                <SelectItem value="loading" disabled>Loading products...</SelectItem>
                               ) : (
                                 products.map(product => (
                                   <SelectItem key={product.id} value={product.id}>

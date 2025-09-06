@@ -61,7 +61,7 @@ export default function HomePage() {
             return (
               <Link
                 key={key}
-                href={`/styleguide/theme-reference/${key}`}
+                href={`/styleguide/theme-reference/${key}` as any}
                 className="group"
               >
                 <Card className="h-full hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1 border-0 bg-card/50 backdrop-blur-sm">

@@ -8,7 +8,9 @@ import {
   CategoriesRepository,
   ProductsRepository,
   SuppliersRepository,
-  PurchaseOrdersRepository
+  PurchaseOrdersRepository,
+  StockRepository,
+  StockTransactionsRepository
 } from './repositories';
 
 @Module({
@@ -22,6 +24,8 @@ import {
     ProductsRepository,
     SuppliersRepository,
     PurchaseOrdersRepository,
+    StockRepository,
+    StockTransactionsRepository,
   ],
   exports: [
     DrizzleService,
@@ -32,6 +36,8 @@ import {
     ProductsRepository,
     SuppliersRepository,
     PurchaseOrdersRepository,
+    StockRepository,
+    StockTransactionsRepository,
   ],
 })
 export class DatabaseModule {}

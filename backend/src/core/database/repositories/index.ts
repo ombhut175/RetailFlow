@@ -9,3 +9,5 @@ export * from './categories.repository';
 export * from './products.repository';
 export * from './suppliers.repository';
 export * from './purchase-orders.repository';
+export * from './stock.repository';
+export * from './stock-transactions.repository';

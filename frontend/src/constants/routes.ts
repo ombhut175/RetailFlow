@@ -22,10 +22,17 @@ export const ROUTES = {
   // Inventory management
   CATEGORIES: '/categories',
   PRODUCTS: '/products',
+  STOCK: '/stock',
+  
+  // Analytics
+  ANALYTICS: '/kombaiDashBoard',
   
   // Purchase Orders management
   PURCHASE_ORDERS: '/purchase-orders',
   SUPPLIERS: '/suppliers',
+  
+  // Admin management
+  ADMIN: '/admin',
   
   // API routes (for external linking/reference)
   API: {
@@ -43,6 +50,40 @@ export const NAV_ITEMS = [
     icon: 'home',
   },
   {
+    title: 'Analytics',
+    href: ROUTES.ANALYTICS,
+    icon: 'chart',
+  },
+  {
+    title: 'Categories',
+    href: ROUTES.CATEGORIES,
+    icon: 'folder',
+  },
+  {
+    title: 'Products',
+    href: ROUTES.PRODUCTS,
+    icon: 'package',
+  },
+  {
+    title: 'Stock',
+    href: ROUTES.STOCK,
+    icon: 'warehouse',
+  },
+  {
+    title: 'Purchase Orders',
+    href: ROUTES.PURCHASE_ORDERS,
+    icon: 'shopping-cart',
+  },
+  {
+    title: 'Admin',
+    href: ROUTES.ADMIN,
+    icon: 'shield',
+  },
+] as const;
+
+// Secondary navigation items (dev/testing tools)
+export const DEV_NAV_ITEMS = [
+  {
     title: 'Nexlog',
     href: ROUTES.NEXLOG,
     icon: 'activity',
@@ -56,26 +97,6 @@ export const NAV_ITEMS = [
     title: 'Component Testing',
     href: ROUTES.COMPONENT_TESTING,
     icon: 'bug',
-  },
-  {
-    title: 'Categories',
-    href: ROUTES.CATEGORIES,
-    icon: 'folder',
-  },
-  {
-    title: 'Products',
-    href: ROUTES.PRODUCTS,
-    icon: 'package',
-  },
-  {
-    title: 'Purchase Orders',
-    href: ROUTES.PURCHASE_ORDERS,
-    icon: 'shopping-cart',
-  },
-  {
-    title: 'Suppliers',
-    href: ROUTES.SUPPLIERS,
-    icon: 'truck',
   },
   {
     title: 'Style Guide',

@@ -15,6 +15,7 @@ import { ProductsModule } from './modules/products/products.module';
 import { UsersModule } from './modules/users/users.module';
 import { SuppliersModule } from './modules/suppliers/suppliers.module';
 import { PurchaseOrdersModule } from './modules/purchase-orders/purchase-orders.module';
+import { StockModule } from './modules/stock/stock.module';
 import { envValidationSchema } from './config/env.validation';
 
 @Module({
@@ -40,6 +41,7 @@ import { envValidationSchema } from './config/env.validation';
     UsersModule,
     SuppliersModule,
     PurchaseOrdersModule,
+    StockModule,
   ],
   controllers: [AppController],
   providers: [AppService],

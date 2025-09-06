@@ -19,10 +19,10 @@ import {
   PurchaseOrderStatus,
   PurchaseOrderStatsResponse
 } from '@/types/purchase-orders';
-import { PurchaseOrderForm } from './_components/PurchaseOrderForm';
-import { PurchaseOrderFiltersComponent } from './_components/PurchaseOrderFilters';
-import { PurchaseOrderDetails } from './_components/PurchaseOrderDetails';
 import hackLog from '@/lib/logger';
+import { PurchaseOrderFiltersComponent } from './_components/PurchaseOrderFilters';
+import { PurchaseOrderForm } from './_components/PurchaseOrderForm';
+import { PurchaseOrderDetails } from './_components/PurchaseOrderDetails';
 
 export default function PurchaseOrdersPage() {
   const { toast } = useToast();
@@ -68,18 +68,21 @@ export default function PurchaseOrdersPage() {
       hackLog.dev('Loading purchase orders', { filters });
       const response = await purchaseOrdersApi.getPurchaseOrders(filters);
       
-      setPurchaseOrders(response.data);
+      // Ensure response.data is an array
+      const ordersData = Array.isArray(response.data) ? response.data : [];
+      
+      setPurchaseOrders(ordersData);
       setTableState(prev => ({
         ...prev,
         loading: false,
-        total: response.total,
-        page: response.page
+        total: response.total || 0,
+        page: response.page || 1
       }));
 
       hackLog.dev('Purchase orders loaded successfully', {
-        count: response.data.length,
-        total: response.total,
-        page: response.page
+        count: ordersData.length,
+        total: response.total || 0,
+        page: response.page || 1
       });
     } catch (error: any) {
       hackLog.error('Failed to load purchase orders', {
@@ -87,6 +90,8 @@ export default function PurchaseOrdersPage() {
         filters
       });
       
+      // Reset to empty array on error
+      setPurchaseOrders([]);
       setTableState(prev => ({
         ...prev,
         loading: false,
@@ -110,6 +115,22 @@ export default function PurchaseOrdersPage() {
     } catch (error: any) {
       hackLog.error('Failed to load purchase order stats', {
         error: error.message
+      });
+      
+      // Set default stats on error to prevent undefined access
+      setStats({
+        totalOrders: 0,
+        byStatus: {
+          [PurchaseOrderStatus.PENDING]: 0,
+          [PurchaseOrderStatus.CONFIRMED]: 0,
+          [PurchaseOrderStatus.RECEIVED]: 0,
+          [PurchaseOrderStatus.CANCELLED]: 0
+        },
+        totalValue: {
+          amount: '0',
+          currency: 'USD'
+        },
+        recentOrders: 0
       });
     }
   };
@@ -322,7 +343,7 @@ export default function PurchaseOrdersPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {stats.byStatus[PurchaseOrderStatus.PENDING] || 0}
+                {stats.byStatus?.[PurchaseOrderStatus.PENDING] || 0}
               </div>
             </CardContent>
           </Card>
@@ -333,7 +354,7 @@ export default function PurchaseOrdersPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {stats.byStatus[PurchaseOrderStatus.RECEIVED] || 0}
+                {stats.byStatus?.[PurchaseOrderStatus.RECEIVED] || 0}
               </div>
             </CardContent>
           </Card>
@@ -419,7 +440,8 @@ export default function PurchaseOrdersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {purchaseOrders.map((order) => (
+                    {Array.isArray(purchaseOrders) && purchaseOrders.length > 0 ? (
+                      purchaseOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell className="font-medium">
                           {order.order_number}
@@ -505,7 +527,16 @@ export default function PurchaseOrdersPage() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          {tableState.loading ? "Loading purchase orders..." : 
+                           tableState.error ? "Error loading purchase orders. Please try again." :
+                           "No purchase orders found."}
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>
