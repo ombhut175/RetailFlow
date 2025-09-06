@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
-import { Moon, Sun, GraduationCap, ArrowLeft } from "lucide-react";
+import { Moon, Sun, Store, ArrowLeft } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/hooks/useAuth";
 import hackLog from "@/lib/logger";
@@ -99,12 +99,12 @@ function Header() {
           <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
           
           <Link href={ROUTES.HOME} className="group inline-flex items-center gap-2">
-            <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-indigo-500 via-violet-500 to-fuchsia-500 shadow-sm ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-105 dark:ring-white/10">
-              <GraduationCap className="h-5 w-5 text-white drop-shadow" />
+            <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-emerald-500 via-green-500 to-teal-500 shadow-sm ring-1 ring-black/5 transition-transform duration-200 group-hover:scale-105 dark:ring-white/10">
+              <Store className="h-5 w-5 text-white drop-shadow" />
             </span>
             <div className="flex flex-col leading-tight">
-              <span className="text-base font-semibold tracking-tight">Quodo</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">Learning Platform</span>
+              <span className="text-base font-semibold tracking-tight">RetailFlow</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Retail Platform</span>
             </div>
           </Link>
         </div>
@@ -142,7 +142,7 @@ function ModeToggle() {
       </motion.span>
 
       {/* Glow */}
-      <span className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 [background:radial-gradient(120px_circle_at_var(--x,50%)_var(--y,50%),rgba(99,102,241,0.25),transparent_70%)] group-hover:opacity-100" />
+      <span className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 [background:radial-gradient(120px_circle_at_var(--x,50%)_var(--y,50%),rgba(16,185,129,0.25),transparent_70%)] group-hover:opacity-100" />
     </motion.button>
   );
 }
@@ -152,8 +152,8 @@ function BackgroundAura() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       {/* Soft radial gradient blobs */}
-      <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-indigo-400/30 to-fuchsia-400/20 blur-3xl dark:from-indigo-500/20 dark:to-fuchsia-500/10" />
-      <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-sky-400/25 to-emerald-400/20 blur-3xl dark:from-sky-500/15 dark:to-emerald-500/10" />
+      <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-400/30 to-teal-400/20 blur-3xl dark:from-emerald-500/20 dark:to-teal-500/10" />
+      <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-green-400/25 to-emerald-400/20 blur-3xl dark:from-green-500/15 dark:to-emerald-500/10" />
 
       {/* Subtle grid pattern */}
       <div

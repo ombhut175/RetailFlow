@@ -10,6 +10,11 @@ import { AiModule } from './modules/ai/ai.module';
 import { TestModule } from './modules/test/test.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthCheckModule } from './modules/health-check/health-check.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { ProductsModule } from './modules/products/products.module';
+import { UsersModule } from './modules/users/users.module';
+import { SuppliersModule } from './modules/suppliers/suppliers.module';
+import { PurchaseOrdersModule } from './modules/purchase-orders/purchase-orders.module';
 import { envValidationSchema } from './config/env.validation';
 
 @Module({
@@ -30,6 +35,11 @@ import { envValidationSchema } from './config/env.validation';
     TestModule,
     AuthModule,
     HealthCheckModule,
+    CategoriesModule,
+    ProductsModule,
+    UsersModule,
+    SuppliersModule,
+    PurchaseOrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

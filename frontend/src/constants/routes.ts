@@ -19,6 +19,14 @@ export const ROUTES = {
   // Style guide and docs
   STYLEGUIDE: '/styleguide',
   
+  // Inventory management
+  CATEGORIES: '/categories',
+  PRODUCTS: '/products',
+  
+  // Purchase Orders management
+  PURCHASE_ORDERS: '/purchase-orders',
+  SUPPLIERS: '/suppliers',
+  
   // API routes (for external linking/reference)
   API: {
     TESTING: '/api/test/testing',
@@ -48,6 +56,26 @@ export const NAV_ITEMS = [
     title: 'Component Testing',
     href: ROUTES.COMPONENT_TESTING,
     icon: 'bug',
+  },
+  {
+    title: 'Categories',
+    href: ROUTES.CATEGORIES,
+    icon: 'folder',
+  },
+  {
+    title: 'Products',
+    href: ROUTES.PRODUCTS,
+    icon: 'package',
+  },
+  {
+    title: 'Purchase Orders',
+    href: ROUTES.PURCHASE_ORDERS,
+    icon: 'shopping-cart',
+  },
+  {
+    title: 'Suppliers',
+    href: ROUTES.SUPPLIERS,
+    icon: 'truck',
   },
   {
     title: 'Style Guide',

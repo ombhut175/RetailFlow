@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <form className="grid gap-4" onSubmit={onSubmit}>
               <Field label="Email" error={displayError ?? undefined}>
-                <Input name="email" type="email" inputMode="email" placeholder="you@school.edu" autoComplete="email" required />
+                <Input name="email" type="email" inputMode="email" placeholder="you@retailstore.com" autoComplete="email" required />
               </Field>
 
               <SubmitButton type="submit" loading={isForgotPasswordLoading}>
@@ -119,17 +119,17 @@ export default function ForgotPasswordPage() {
 function AsidePanel() {
   return (
     <div className="relative mx-auto max-w-md md:max-w-none">
-      <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-rose-500/15 via-pink-500/10 to-purple-500/15 p-6 shadow-2xl backdrop-blur-sm dark:border-white/10">
+      <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-emerald-500/15 via-green-500/10 to-teal-500/15 p-6 shadow-2xl backdrop-blur-sm dark:border-white/10">
         <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">We got your back</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          Secure account recovery ensures your learning never stops.
+          Secure account recovery ensures your business operations never stop.
         </p>
         <div className="mt-4 grid gap-3 text-sm">
           <div className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
             One-click reset from your email
           </div>
           <div className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
-            Strong security with token-based links
+            Enterprise-grade security for your retail data
           </div>
         </div>
       </div>

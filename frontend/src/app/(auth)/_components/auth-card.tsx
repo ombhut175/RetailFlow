@@ -64,7 +64,7 @@ export default function AuthCard({ title, subtitle, footer, children }: AuthCard
             className="absolute inset-0 rounded-[22px] opacity-80"
             style={{
               background:
-                "conic-gradient(from 0deg at 50% 50%, rgba(99,102,241,0.35), rgba(236,72,153,0.35), rgba(34,197,94,0.35), rgba(99,102,241,0.35))",
+                "conic-gradient(from 0deg at 50% 50%, rgba(16,185,129,0.35), rgba(5,150,105,0.35), rgba(13,148,136,0.35), rgba(16,185,129,0.35))",
               filter: "blur(10px)",
             }}
             animate={{ rotate: 360 }}
@@ -80,13 +80,13 @@ export default function AuthCard({ title, subtitle, footer, children }: AuthCard
             className="pointer-events-none absolute -inset-2 rounded-[20px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             style={{
               background:
-                "radial-gradient(220px 220px at var(--x,50%) var(--y,0%), rgba(99,102,241,0.18), transparent 60%)",
+                "radial-gradient(220px 220px at var(--x,50%) var(--y,0%), rgba(16,185,129,0.18), transparent 60%)",
             }}
           />
 
           <div className="relative z-10 flex flex-col gap-6">
             <header className="flex flex-col gap-1" style={{ transform: "translateZ(40px)" }}>
-              <h1 className="bg-gradient-to-r from-slate-900 via-indigo-700 to-fuchsia-700 bg-clip-text text-3xl font-bold tracking-tight text-transparent dark:from-white dark:via-indigo-300 dark:to-fuchsia-300 md:text-4xl">
+              <h1 className="bg-gradient-to-r from-slate-900 via-emerald-700 to-teal-700 bg-clip-text text-3xl font-bold tracking-tight text-transparent dark:from-white dark:via-emerald-300 dark:to-teal-300 md:text-4xl">
                 {title}
               </h1>
               {subtitle ? (
@@ -98,7 +98,7 @@ export default function AuthCard({ title, subtitle, footer, children }: AuthCard
           </div>
 
           {/* bottom accent */}
-          <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
         </div>
       </motion.div>
 
@@ -147,7 +147,7 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
         }}
         className={[
           "h-11 w-full rounded-[10px] border bg-white/90 px-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition-all",
-          "border-transparent hover:border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 dark:border-transparent dark:bg-slate-950/70 dark:text-slate-100",
+          "border-transparent hover:border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 dark:border-transparent dark:bg-slate-950/70 dark:text-slate-100",
           props.className,
         ]
           .filter(Boolean)
@@ -157,7 +157,7 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
         aria-hidden
         initial={false}
         animate={{ opacity: focused ? 1 : 0 }}
-        className="pointer-events-none absolute -inset-0.5 rounded-[12px] bg-gradient-to-r from-indigo-500/20 via-fuchsia-500/20 to-emerald-500/20 blur-md"
+        className="pointer-events-none absolute -inset-0.5 rounded-[12px] bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-teal-500/20 blur-md"
       />
     </div>
   );
@@ -182,7 +182,7 @@ export function PasswordInput({ className, ...props }: React.InputHTMLAttributes
         type={visible ? "text" : "password"}
         className={[
           "h-11 w-full rounded-[10px] border bg-white/90 px-3 pr-12 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm outline-none transition-all",
-          "border-transparent hover:border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 dark:border-transparent dark:bg-slate-950/70 dark:text-slate-100",
+          "border-transparent hover:border-slate-200 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 dark:border-transparent dark:bg-slate-950/70 dark:text-slate-100",
           className,
         ]
           .filter(Boolean)
@@ -200,7 +200,7 @@ export function PasswordInput({ className, ...props }: React.InputHTMLAttributes
         aria-hidden
         initial={false}
         animate={{ opacity: focused ? 1 : 0 }}
-        className="pointer-events-none absolute -inset-0.5 rounded-[12px] bg-gradient-to-r from-indigo-500/20 via-fuchsia-500/20 to-emerald-500/20 blur-md"
+        className="pointer-events-none absolute -inset-0.5 rounded-[12px] bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-teal-500/20 blur-md"
       />
     </div>
   );
@@ -221,21 +221,24 @@ export function SubmitButton({ children, loading, className, ...props }: React.B
   }
 
   return (
-    <motion.button
-      ref={ref}
-      onMouseMove={onMove}
+    <motion.div
       whileTap={{ scale: 0.985 }}
       whileHover={{ y: -1, scale: 1.01 }}
-      disabled={loading || props.disabled}
-      className={[
-        "group relative inline-flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4 text-sm font-semibold text-white transition-all disabled:cursor-not-allowed",
-        "shadow-lg shadow-indigo-600/20",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      style={{ background: "linear-gradient(135deg,#4f46e5,#7c3aed,#ec4899)" }}
-      {...props}
+      className="w-full"
+    >
+      <button
+        ref={ref}
+        onMouseMove={onMove}
+        disabled={loading || props.disabled}
+        className={[
+          "group relative inline-flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4 text-sm font-semibold text-white transition-all disabled:cursor-not-allowed",
+          "shadow-lg shadow-emerald-600/20",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        style={{ background: "linear-gradient(135deg,#10b981,#059669,#0d9488)" }}
+        {...props}
     >
       {/* Sheen sweep */}
       <motion.span
@@ -258,18 +261,19 @@ export function SubmitButton({ children, loading, className, ...props }: React.B
         style={{ background: "radial-gradient(140px 140px at var(--x) var(--y), rgba(255,255,255,0.25), transparent 60%)" }}
       />
 
-      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 opacity-90 transition-transform group-hover:translate-x-0.5" />}
-      <span className="relative z-10">{children}</span>
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 opacity-90 transition-transform group-hover:translate-x-0.5" />}
+        <span className="relative z-10">{children}</span>
 
-      <span aria-hidden className="absolute inset-0 rounded-xl ring-1 ring-white/20" />
-    </motion.button>
+        <span aria-hidden className="absolute inset-0 rounded-xl ring-1 ring-white/20" />
+      </button>
+    </motion.div>
   );
 }
 
 // Muted link
 export function MutedLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="text-sm text-slate-600 underline-offset-4 transition-all hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-white">
+    <Link href={href as any} className="text-sm text-slate-600 underline-offset-4 transition-all hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-white">
       {children}
     </Link>
   );

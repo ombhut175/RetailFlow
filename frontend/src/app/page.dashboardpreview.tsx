@@ -1,8 +1,0 @@
-"use client";
-
-import * as React from "react";
-import KombaiDashboard from "./(others)/kombaiDashBoard/page";
-
-export default function DashboardPreview() {
-  return <KombaiDashboard />;
-}

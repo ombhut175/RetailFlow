@@ -102,7 +102,7 @@ export default function SignupPage() {
       <div className="order-2 md:order-1">
         <AuthCard
           title="Create your account"
-          subtitle="Join thousands of learners accelerating their careers"
+          subtitle="Join thousands of retailers growing their business"
           footer={
             <div className="space-x-1">
               <span>Already have an account?</span>
@@ -116,7 +116,7 @@ export default function SignupPage() {
             </Field>
 
             <Field label="Email" error={displayErrors?.email}>
-              <Input name="email" type="email" inputMode="email" placeholder="you@school.edu" autoComplete="email" required />
+              <Input name="email" type="email" inputMode="email" placeholder="you@retailstore.com" autoComplete="email" required />
             </Field>
 
             <Field label="Password" hint="Use at least 8 characters." error={displayErrors?.password}>
@@ -128,7 +128,7 @@ export default function SignupPage() {
             </Field>
 
             <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-              <input type="checkbox" name="tos" required className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+              <input type="checkbox" name="tos" required className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
               <span>I agree to the Terms and Privacy Policy</span>
             </label>
 
@@ -150,19 +150,19 @@ function SignupAside() {
   return (
     <div className="relative mx-auto max-w-md md:max-w-none">
       <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-emerald-500/15 via-teal-500/10 to-sky-500/15 p-6 shadow-2xl backdrop-blur-sm dark:border-white/10">
-        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Your path, accelerated</h2>
+        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Your business, optimized</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          Build real-world skills with curated courses, hands-on projects, and mentor support.
+          Build a thriving retail business with smart inventory management, seamless POS integration, and powerful analytics.
         </p>
         <div className="mt-4 grid gap-3 text-sm">
           <div className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
-            Live cohort-based learning
+            Multi-location inventory sync
           </div>
           <div className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
-            Peer reviews and code clinics
+            Advanced sales reporting & insights
           </div>
           <div className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
-            Career-ready portfolio projects
+            Customer loyalty program integration
           </div>
         </div>
       </div>

@@ -7,15 +7,17 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { ROUTES } from "@/constants/routes";
 import hackLog from "@/lib/logger";
 import {
-  GraduationCap,
+  Store,
   Rocket,
-  BrainCircuit,
-  BookOpenCheck,
+  BarChart3,
+  Package,
   ShieldCheck,
   Users,
   Sparkles,
   ArrowRight,
   PlayCircle,
+  ShoppingCart,
+  CreditCard,
 } from "lucide-react";
 
 // Motion variants
@@ -64,12 +66,12 @@ function Header() {
     <header className="sticky top-0 z-30 w-full border-b border-border/60 bg-card/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
         <Link href="/" className="group inline-flex items-center gap-2">
-          <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-indigo-500 via-violet-500 to-fuchsia-500 shadow-sm ring-1 ring-border transition-transform duration-200 group-hover:scale-105">
-            <GraduationCap className="h-5 w-5 text-white drop-shadow" />
+          <span className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-tr from-emerald-500 via-green-500 to-teal-500 shadow-sm ring-1 ring-border transition-transform duration-200 group-hover:scale-105">
+            <Store className="h-5 w-5 text-white drop-shadow" />
           </span>
           <div className="flex flex-col leading-tight">
-            <span className="text-base font-semibold tracking-tight">Quodo</span>
-            <span className="text-[11px] text-muted-foreground">EdTech Platform</span>
+            <span className="text-base font-semibold tracking-tight">RetailFlow</span>
+            <span className="text-[11px] text-muted-foreground">Retail Platform</span>
           </div>
         </Link>
 
@@ -108,18 +110,18 @@ function Hero() {
     <section className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 py-14 md:grid-cols-2 md:py-20 lg:py-24">
       <motion.div variants={container} initial="hidden" animate="show" className="order-2 md:order-1">
         <motion.div variants={item} className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-sm">
-          <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
-          Learn smarter with AI-guided paths
+          <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
+          Manage inventory with smart automation
         </motion.div>
-        <motion.h1 variants={item} className="mt-4 bg-gradient-to-r from-foreground via-indigo-600 to-fuchsia-600 bg-clip-text text-4xl font-extrabold leading-tight tracking-tight text-transparent md:text-5xl lg:text-6xl dark:via-indigo-300 dark:to-fuchsia-300">
-          Unlock your next skill, faster
+        <motion.h1 variants={item} className="mt-4 bg-gradient-to-r from-foreground via-emerald-600 to-teal-600 bg-clip-text text-4xl font-extrabold leading-tight tracking-tight text-transparent md:text-5xl lg:text-6xl dark:via-emerald-300 dark:to-teal-300">
+          Streamline your retail business
         </motion.h1>
         <motion.p variants={item} className="mt-4 max-w-xl text-base text-muted-foreground md:text-lg">
-          Quodo is the modern learning platform for ambitious learners. Follow curated roadmaps, track progress, and master skills with hands-on projects.
+          RetailFlow is the complete POS and inventory management platform. Track stock, process sales, and grow your business with powerful analytics.
         </motion.p>
         <motion.div variants={item} className="mt-6 flex flex-wrap items-center gap-3">
           <PrimaryLink href={ROUTES.AUTH.SIGNUP} className="gap-2">
-            Start learning free
+            Start free trial
             <ArrowRight className="h-4 w-4" />
           </PrimaryLink>
           <GhostLink href={ROUTES.AUTH.LOGIN} className="gap-2">
@@ -128,8 +130,8 @@ function Hero() {
           </GhostLink>
         </motion.div>
         <motion.div variants={item} className="mt-6 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" />Trusted by 10k+ learners</div>
-          <div className="flex items-center gap-2"><Users className="h-4 w-4 text-sky-500" />Cohort-based learning</div>
+          <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" />Trusted by 10k+ retailers</div>
+          <div className="flex items-center gap-2"><Users className="h-4 w-4 text-sky-500" />Multi-location support</div>
         </motion.div>
       </motion.div>
 
@@ -196,20 +198,20 @@ function HeroVisual() {
 
         <div className="relative z-10 flex flex-col gap-4" style={{ transform: "translateZ(30px)" }}>
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Your AI learning copilot</h2>
+            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Your retail management hub</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Adaptive roadmaps, instant feedback, and project-driven lessons — all tailored to your goals.
+              Complete POS system, inventory tracking, and sales analytics — all integrated for your business success.
             </p>
           </div>
           <ul className="grid gap-3 text-sm">
             <li className="rounded-xl border border-border bg-card/70 p-3 shadow-sm transition-colors">
-              <div className="flex items-center gap-2"><BrainCircuit className="h-4 w-4 text-fuchsia-500" /> Personalized AI study paths</div>
+              <div className="flex items-center gap-2"><ShoppingCart className="h-4 w-4 text-emerald-500" /> Complete POS system</div>
             </li>
             <li className="rounded-xl border border-border bg-card/70 p-3 shadow-sm transition-colors">
-              <div className="flex items-center gap-2"><BookOpenCheck className="h-4 w-4 text-indigo-500" /> Hands-on projects, real outcomes</div>
+              <div className="flex items-center gap-2"><Package className="h-4 w-4 text-green-500" /> Real-time inventory tracking</div>
             </li>
             <li className="rounded-xl border border-border bg-card/70 p-3 shadow-sm transition-colors">
-              <div className="flex items-center gap-2"><Rocket className="h-4 w-4 text-emerald-500" /> Track progress and build momentum</div>
+              <div className="flex items-center gap-2"><BarChart3 className="h-4 w-4 text-teal-500" /> Advanced sales analytics</div>
             </li>
           </ul>
         </div>
@@ -224,8 +226,8 @@ function Highlights() {
   return (
     <section id="features" className="mx-auto max-w-6xl py-10 md:py-14 lg:py-16">
       <div className="mx-auto mb-8 max-w-2xl text-center md:mb-12">
-        <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Everything you need to accelerate learning</h2>
-        <p className="mt-2 text-muted-foreground">Designed with a premium, modern aesthetic that matches your auth theme.</p>
+        <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Everything you need to run your retail business</h2>
+        <p className="mt-2 text-muted-foreground">Professional tools designed for modern retailers and inventory managers.</p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -234,7 +236,7 @@ function Highlights() {
             <div className="group h-full overflow-hidden rounded-2xl border border-border bg-card/80 shadow-sm transition-all hover:shadow-xl">
               <div className="p-6">
                 <div className="flex items-start gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-indigo-500/20 via-violet-500/20 to-fuchsia-500/20 ring-1 ring-border">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-emerald-500/20 via-green-500/20 to-teal-500/20 ring-1 ring-border">
                     {f.icon}
                   </div>
                   <div>
@@ -260,22 +262,22 @@ function Highlights() {
 
 const features: Feature[] = [
   {
-    title: "Adaptive Learning",
-    desc: "AI tailors lessons to your strengths and areas for growth.",
-    icon: <BrainCircuit className="h-5 w-5 text-fuchsia-600 dark:text-fuchsia-400" />,
-    points: ["Personalized modules", "Dynamic difficulty", "Smart reminders"],
+    title: "Smart POS System",
+    desc: "Complete point-of-sale with payment processing and receipts.",
+    icon: <CreditCard className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />,
+    points: ["Multiple payment methods", "Digital receipts", "Tax calculations"],
   },
   {
-    title: "Project-Based Curriculum",
-    desc: "Build a real portfolio with guided, hands-on projects.",
-    icon: <BookOpenCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />,
-    points: ["Step-by-step briefs", "Real-world scenarios", "Code reviews"],
+    title: "Inventory Management",
+    desc: "Real-time stock tracking with automated reorder alerts.",
+    icon: <Package className="h-5 w-5 text-green-600 dark:text-green-400" />,
+    points: ["Stock level monitoring", "Barcode scanning", "Supplier management"],
   },
   {
-    title: "Motivation & Momentum",
-    desc: "Stay consistent with streaks, checkpoints, and cohorts.",
-    icon: <Rocket className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />,
-    points: ["Weekly sprints", "Peer accountability", "Progress tracker"],
+    title: "Sales Analytics",
+    desc: "Comprehensive reports and insights to grow your business.",
+    icon: <BarChart3 className="h-5 w-5 text-teal-600 dark:text-teal-400" />,
+    points: ["Daily sales reports", "Product performance", "Customer insights"],
   },
 ];
 
@@ -290,10 +292,10 @@ function Stats() {
         className="grid gap-6 rounded-3xl border border-border bg-card/70 p-6 shadow-sm backdrop-blur-sm md:grid-cols-4"
       >
         {[
-          { label: "Active learners", value: "10k+" },
-          { label: "Completion rate", value: "92%" },
-          { label: "Projects shipped", value: "25k+" },
-          { label: "Avg. review score", value: "4.8/5" },
+          { label: "Active retailers", value: "5k+" },
+          { label: "Uptime guarantee", value: "99.9%" },
+          { label: "Transactions processed", value: "2M+" },
+          { label: "Customer satisfaction", value: "4.9/5" },
         ].map((s) => (
           <div key={s.label} className="text-center md:text-left">
             <div className="text-3xl font-semibold tracking-tight">{s.value}</div>
@@ -313,13 +315,13 @@ function CTA() {
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-indigo-500/15 via-violet-500/10 to-fuchsia-500/15 p-8 shadow-2xl backdrop-blur-sm"
+        className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-emerald-500/15 via-green-500/10 to-teal-500/15 p-8 shadow-2xl backdrop-blur-sm"
       >
         <div className="grid gap-8 md:grid-cols-2 md:items-center">
           <div>
-            <h3 className="text-2xl font-bold tracking-tight md:text-3xl">Start learning today — it’s free to try</h3>
+            <h3 className="text-2xl font-bold tracking-tight md:text-3xl">Start selling smarter — it's free to try</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Create your account in seconds. Access core modules free. Upgrade anytime to unlock cohorts and advanced mentorship.
+              Create your account in seconds. Process your first sales free. Upgrade anytime to unlock advanced analytics and integrations.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 md:justify-end">
@@ -340,10 +342,10 @@ function Footer() {
     <footer className="mx-auto mt-10 max-w-6xl border-t border-border py-8 text-sm text-muted-foreground">
       <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
         <div className="flex items-center gap-2 text-foreground">
-          <span className="relative grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-tr from-indigo-500 via-violet-500 to-fuchsia-500 ring-1 ring-border">
-            <GraduationCap className="h-4 w-4 text-white" />
+          <span className="relative grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-tr from-emerald-500 via-green-500 to-teal-500 ring-1 ring-border">
+            <Store className="h-4 w-4 text-white" />
           </span>
-          <span className="font-medium">Quodo</span>
+          <span className="font-medium">RetailFlow</span>
           <span className="text-xs text-muted-foreground">© {new Date().getFullYear()}</span>
         </div>
         <div className="flex items-center gap-4">
@@ -360,8 +362,8 @@ function BackgroundAura() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       {/* Soft radial gradient blobs */}
-      <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-indigo-400/30 to-fuchsia-400/20 blur-3xl dark:from-indigo-500/20 dark:to-fuchsia-500/10" />
-      <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-sky-400/25 to-emerald-400/20 blur-3xl dark:from-sky-500/15 dark:to-emerald-500/10" />
+      <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-400/30 to-teal-400/20 blur-3xl dark:from-emerald-500/20 dark:to-teal-500/10" />
+      <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-green-400/25 to-emerald-400/20 blur-3xl dark:from-green-500/15 dark:to-emerald-500/10" />
 
       {/* Subtle grid pattern */}
       <div
@@ -392,7 +394,7 @@ function PrimaryLink({ href, className, children }: { href: string; className?: 
         "btn-super",
         className,
       ].filter(Boolean).join(" ")}
-      style={{ backgroundImage: "linear-gradient(135deg,#4f46e5,#7c3aed,#ec4899)" }}
+      style={{ backgroundImage: "linear-gradient(135deg,#10b981,#059669,#0d9488)" }}
     >
       <span className="relative z-10 flex items-center gap-2">{children}</span>
       <span

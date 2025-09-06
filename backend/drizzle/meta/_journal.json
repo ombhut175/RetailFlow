@@ -43,6 +43,13 @@
       "when": 1757068577583,
       "tag": "0005_milky_earthquake",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1757131606411,
+      "tag": "0006_melted_ikaris",
+      "breakpoints": true
     }
   ]
 }

@@ -7,9 +7,26 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as basicAuth from 'express-basic-auth';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor';
 import { ENV } from './common/constants/string-const';
 import * as cookieParser from 'cookie-parser';
 import { Logger } from '@nestjs/common';
+
+// Global error handlers to prevent server hanging
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // Log the error but don't exit immediately to allow graceful shutdown
+  setTimeout(() => {
+    console.error('Exiting due to uncaught exception');
+    process.exit(1);
+  }, 1000);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Log the error but don't exit - let the application continue
+});
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -65,9 +82,13 @@ async function bootstrap() {
       logger.log(`CORS enabled for ${nodeEnv} (origin: ${frontendUrl})`);
     }
 
-    // Global exception filter
-    app.useGlobalFilters(new HttpExceptionFilter());
-    logger.log('Global exception filter applied');
+    // Global exception filters (order matters - more specific first)
+    app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
+    logger.log('Global exception filters applied');
+
+    // Global timeout interceptor
+    app.useGlobalInterceptors(new TimeoutInterceptor(30000)); // 30 second global timeout
+    logger.log('Global timeout interceptor applied');
 
     // Swagger configuration (only in non-production environments unless explicitly disabled)
     const swaggerEnabled = (process.env[ENV.SWAGGER_ENABLED] ?? 'true').toString() === 'true';

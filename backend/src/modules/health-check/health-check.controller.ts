@@ -50,6 +50,37 @@ export class HealthCheckController {
     }
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Simple health check endpoint' })
+  @ApiResponse({
+    status: 200,
+    description: 'Server is healthy',
+    schema: {
+      example: {
+        status: 'ok',
+        timestamp: '2023-12-01T10:00:00.000Z',
+        uptime: 12345,
+        memory: {
+          used: 123456789,
+          total: 987654321,
+        },
+      },
+    },
+  })
+  getHealth() {
+    const memoryUsage = process.memoryUsage();
+    
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: {
+        used: memoryUsage.heapUsed,
+        total: memoryUsage.heapTotal,
+      },
+    };
+  }
+
   @Post('trigger')
   @ApiOperation({ summary: 'Manually trigger health check cron job' })
   @ApiResponse({

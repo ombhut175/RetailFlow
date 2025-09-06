@@ -15,6 +15,9 @@ This document defines **simplified rules** for rapid hackathon development with 
 These are the current non-auth pages grouped under `src/app/(others)` in this project. Keep this list updated when you add or remove pages in that folder.
 
 - `/dashboard` — `src/app/(others)/dashboard/page.tsx` (main dashboard page)
+- `/categories` — `src/app/(others)/categories/page.tsx` (categories management page)  
+- `/products` — `src/app/(others)/products/page.tsx` (products management page)
+- `/purchase-orders` — `src/app/(others)/purchase-orders/page.tsx` (purchase orders management page)
 - `(group) layout` — `src/app/(others)/layout.tsx` (layout used for the grouped routes)
 
 Add new entries here for any additional non-auth pages you create in `src/app/(others)`.

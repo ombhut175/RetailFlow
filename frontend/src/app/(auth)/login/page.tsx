@@ -102,17 +102,17 @@ export default function LoginPage() {
       >
         <AuthCard
           title="Welcome back"
-          subtitle="Access your personalized learning dashboard"
+          subtitle="Access your retail management dashboard"
           footer={
             <div className="space-x-1">
-              <span>New to Quodo?</span>
+              <span>New to RetailFlow?</span>
               <MutedLink href="/signup">Create an account</MutedLink>
             </div>
           }
         >
           <form className="grid gap-4" onSubmit={onSubmit}>
             <Field label="Email" error={displayErrors?.email}>
-              <Input name="email" type="email" inputMode="email" placeholder="you@school.edu" autoComplete="email" required />
+              <Input name="email" type="email" inputMode="email" placeholder="you@retailstore.com" autoComplete="email" required />
             </Field>
 
             <Field label="Password" error={displayErrors?.password}>
@@ -156,22 +156,22 @@ export default function LoginPage() {
 function HeroAside() {
   return (
     <div className="relative mx-auto max-w-md md:max-w-none">
-      <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-indigo-500/15 via-violet-500/10 to-fuchsia-500/15 p-6 shadow-2xl backdrop-blur-sm dark:border-white/10">
+      <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-emerald-500/15 via-green-500/10 to-teal-500/15 p-6 shadow-2xl backdrop-blur-sm dark:border-white/10">
         <div className="mb-5">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Level up your learning</h2>
+          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Streamline your retail operations</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Quodo adapts to your pace with interactive modules, progress tracking, and AI-guided study paths.
+            RetailFlow adapts to your business with smart inventory tracking, seamless POS integration, and powerful analytics.
           </p>
         </div>
         <ul className="grid gap-3 text-sm">
           <li className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
-            Personalized roadmaps and micro-goals
+            Real-time inventory tracking and alerts
           </li>
           <li className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
-            Rich media lessons and live sessions
+            Complete POS system with payment processing
           </li>
           <li className="rounded-xl border border-black/10 bg-white/50 p-3 shadow-sm transition-colors dark:border-white/10 dark:bg-slate-900/60">
-            Certificates that matter in the real world
+            Sales analytics that drive business growth
           </li>
         </ul>
       </div>

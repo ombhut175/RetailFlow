@@ -1,8 +1,9 @@
-import { Injectable, Logger, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { SupabaseService } from '../../core/supabase/supabase.service';
 import { UsersRepository } from '../../core/database/repositories';
 import { MESSAGES, ENV } from '../../common/constants/string-const';
 import { LoginDto, SignupDto, ForgotPasswordDto } from './dto';
+import { TimeoutUtil } from '../../common/utils/timeout.util';
 
 @Injectable()
 export class AuthService {
@@ -17,10 +18,17 @@ export class AuthService {
     try {
       const supabase = this.supabaseService.getClient();
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginDto.email,
-        password: loginDto.password,
-      });
+      // Wrap Supabase auth call with timeout
+      const authResult = await TimeoutUtil.withTimeout(
+        supabase.auth.signInWithPassword({
+          email: loginDto.email,
+          password: loginDto.password,
+        }),
+        10000, // 10 second timeout for auth
+        'Supabase authentication timeout'
+      );
+
+      const { data, error } = authResult;
 
       if (error) {
         this.logger.error(`Login failed for ${loginDto.email}: ${error.message}`);
@@ -40,28 +48,45 @@ export class AuthService {
       let publicUser = null;
       if (data.user) {
         try {
-          publicUser = await this.usersRepository.findById(data.user.id);
+          // Wrap database operations with timeout
+          publicUser = await TimeoutUtil.withTimeout(
+            this.usersRepository.findById(data.user.id),
+            5000, // 5 second timeout for DB operations
+            'Database query timeout'
+          );
           
           if (!publicUser) {
             // Create public user record if it doesn't exist (for existing Supabase users)
-            publicUser = await this.usersRepository.create({
-              id: data.user.id, // Use Supabase user ID as the UUID id
-              email: loginDto.email,
-              isEmailVerified: !!data.user.email_confirmed_at,
-            });
+            publicUser = await TimeoutUtil.withTimeout(
+              this.usersRepository.create({
+                id: data.user.id, // Use Supabase user ID as the UUID id
+                email: loginDto.email,
+                isEmailVerified: !!data.user.email_confirmed_at,
+              }),
+              5000,
+              'Database create timeout'
+            );
             this.logger.log(`Created missing public user record for ${loginDto.email}`);
           } else {
             // Update verification status based on Supabase auth status
             if (data.user.email_confirmed_at && !publicUser.isEmailVerified) {
-              publicUser = await this.usersRepository.update(publicUser.id, {
-                isEmailVerified: true,
-              });
+              publicUser = await TimeoutUtil.withTimeout(
+                this.usersRepository.update(publicUser.id, {
+                  isEmailVerified: true,
+                }),
+                5000,
+                'Database update timeout'
+              );
               this.logger.log(`Updated email verification status for ${loginDto.email}`);
             }
           }
         } catch (dbError) {
           this.logger.error(`Database error during login for ${loginDto.email}: ${dbError.message}`);
           // Continue with login even if public user operations fail
+          // But ensure we don't hang the server
+          if (dbError.message.includes('timeout')) {
+            this.logger.warn(`Database timeout during login for ${loginDto.email}, continuing without public user data`);
+          }
         }
       }
 
@@ -77,8 +102,20 @@ export class AuthService {
       if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
         throw error;
       }
-      this.logger.error(`Unexpected login error: ${error.message}`);
-      throw new BadRequestException(MESSAGES.UNEXPECTED_ERROR);
+      
+      // Handle timeout and connection errors specifically
+      if (error.message.includes('timeout')) {
+        this.logger.error(`Login timeout for ${loginDto.email}: ${error.message}`);
+        throw new InternalServerErrorException('Login request timed out. Please try again.');
+      }
+      
+      if (error.message.includes('connection') || error.message.includes('ECONNREFUSED')) {
+        this.logger.error(`Connection error during login for ${loginDto.email}: ${error.message}`);
+        throw new InternalServerErrorException('Service temporarily unavailable. Please try again later.');
+      }
+      
+      this.logger.error(`Unexpected login error for ${loginDto.email}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException(MESSAGES.UNEXPECTED_ERROR);
     }
   }
 
@@ -86,13 +123,20 @@ export class AuthService {
     try {
       const supabase = this.supabaseService.getClient();
 
-      const { data, error } = await supabase.auth.signUp({
-        email: signupDto.email,
-        password: signupDto.password,
-        options: {
-          emailRedirectTo: `${process.env[ENV.REDIRECT_TO_FRONTEND_URL] || `${process.env[ENV.FRONTEND_URL]}/login`}`,
-        },
-      });
+      // Wrap Supabase auth call with timeout
+      const authResult = await TimeoutUtil.withTimeout(
+        supabase.auth.signUp({
+          email: signupDto.email,
+          password: signupDto.password,
+          options: {
+            emailRedirectTo: `${process.env[ENV.REDIRECT_TO_FRONTEND_URL] || `${process.env[ENV.FRONTEND_URL]}/login`}`,
+          },
+        }),
+        10000, // 10 second timeout for auth
+        'Supabase signup timeout'
+      );
+
+      const { data, error } = authResult;
 
       if (error) {
         this.logger.error(`Signup failed for ${signupDto.email}: ${error.message}`);
@@ -115,16 +159,23 @@ export class AuthService {
       let publicUser = null;
       if (data.user) {
         try {
-          publicUser = await this.usersRepository.create({
-            id: data.user.id, // Use Supabase user ID as the UUID id
-            email: signupDto.email,
-            isEmailVerified: false, // Set as false initially
-          });
+          publicUser = await TimeoutUtil.withTimeout(
+            this.usersRepository.create({
+              id: data.user.id, // Use Supabase user ID as the UUID id
+              email: signupDto.email,
+              isEmailVerified: false, // Set as false initially
+            }),
+            5000, // 5 second timeout for DB operations
+            'Database create timeout'
+          );
           this.logger.log(`Public user record created for ${signupDto.email}`);
         } catch (dbError) {
           this.logger.error(`Failed to create public user record for ${signupDto.email}: ${dbError.message}`);
           // Note: We don't fail the signup if public user creation fails
           // The Supabase auth user still exists and can be recovered
+          if (dbError.message.includes('timeout')) {
+            this.logger.warn(`Database timeout during signup for ${signupDto.email}, continuing without public user data`);
+          }
         }
       }
 
@@ -141,8 +192,20 @@ export class AuthService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      this.logger.error(`Unexpected signup error: ${error.message}`);
-      throw new BadRequestException(MESSAGES.UNEXPECTED_ERROR);
+      
+      // Handle timeout and connection errors specifically
+      if (error.message.includes('timeout')) {
+        this.logger.error(`Signup timeout for ${signupDto.email}: ${error.message}`);
+        throw new InternalServerErrorException('Signup request timed out. Please try again.');
+      }
+      
+      if (error.message.includes('connection') || error.message.includes('ECONNREFUSED')) {
+        this.logger.error(`Connection error during signup for ${signupDto.email}: ${error.message}`);
+        throw new InternalServerErrorException('Service temporarily unavailable. Please try again later.');
+      }
+      
+      this.logger.error(`Unexpected signup error for ${signupDto.email}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException(MESSAGES.UNEXPECTED_ERROR);
     }
   }
 
@@ -150,9 +213,15 @@ export class AuthService {
     try {
       const supabase = this.supabaseService.getClient();
 
-      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordDto.email, {
-        redirectTo: `${process.env[ENV.FRONTEND_URL] || 'http://localhost:3000'}/auth/reset-password`,
-      });
+      const resetResult = await TimeoutUtil.withTimeout(
+        supabase.auth.resetPasswordForEmail(forgotPasswordDto.email, {
+          redirectTo: `${process.env[ENV.FRONTEND_URL] || 'http://localhost:3000'}/auth/reset-password`,
+        }),
+        10000, // 10 second timeout
+        'Password reset timeout'
+      );
+
+      const { error } = resetResult;
 
       if (error) {
         this.logger.error(`Password reset failed for ${forgotPasswordDto.email}: ${error.message}`);
@@ -173,8 +242,20 @@ export class AuthService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      this.logger.error(`Unexpected forgot password error: ${error.message}`);
-      throw new BadRequestException(MESSAGES.UNEXPECTED_ERROR);
+      
+      // Handle timeout and connection errors specifically
+      if (error.message.includes('timeout')) {
+        this.logger.error(`Password reset timeout for ${forgotPasswordDto.email}: ${error.message}`);
+        throw new InternalServerErrorException('Password reset request timed out. Please try again.');
+      }
+      
+      if (error.message.includes('connection') || error.message.includes('ECONNREFUSED')) {
+        this.logger.error(`Connection error during password reset for ${forgotPasswordDto.email}: ${error.message}`);
+        throw new InternalServerErrorException('Service temporarily unavailable. Please try again later.');
+      }
+      
+      this.logger.error(`Unexpected forgot password error for ${forgotPasswordDto.email}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException(MESSAGES.UNEXPECTED_ERROR);
     }
   }
 
@@ -182,7 +263,13 @@ export class AuthService {
     try {
       const supabase = this.supabaseService.getClient();
 
-      const { error } = await supabase.auth.signOut();
+      const logoutResult = await TimeoutUtil.withTimeout(
+        supabase.auth.signOut(),
+        5000, // 5 second timeout for logout
+        'Logout timeout'
+      );
+
+      const { error } = logoutResult;
 
       if (error) {
         this.logger.error(`Logout failed for user ${userId}: ${error.message}`);
@@ -195,8 +282,20 @@ export class AuthService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      this.logger.error(`Unexpected logout error: ${error.message}`);
-      throw new BadRequestException(MESSAGES.UNEXPECTED_ERROR);
+      
+      // Handle timeout and connection errors specifically
+      if (error.message.includes('timeout')) {
+        this.logger.error(`Logout timeout for user ${userId}: ${error.message}`);
+        throw new InternalServerErrorException('Logout request timed out. Please try again.');
+      }
+      
+      if (error.message.includes('connection') || error.message.includes('ECONNREFUSED')) {
+        this.logger.error(`Connection error during logout for user ${userId}: ${error.message}`);
+        throw new InternalServerErrorException('Service temporarily unavailable. Please try again later.');
+      }
+      
+      this.logger.error(`Unexpected logout error for user ${userId}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException(MESSAGES.UNEXPECTED_ERROR);
     }
   }
 
@@ -204,7 +303,13 @@ export class AuthService {
     try {
       const supabase = this.supabaseService.getClient();
 
-      const { data, error } = await supabase.auth.getUser(token);
+      const userResult = await TimeoutUtil.withTimeout(
+        supabase.auth.getUser(token),
+        5000, // 5 second timeout for user lookup
+        'Get user timeout'
+      );
+
+      const { data, error } = userResult;
 
       if (error) {
         this.logger.error(`Failed to get current user: ${error.message}`);
@@ -216,8 +321,20 @@ export class AuthService {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      this.logger.error(`Unexpected getCurrentUser error: ${error.message}`);
-      throw new BadRequestException(MESSAGES.UNEXPECTED_ERROR);
+      
+      // Handle timeout and connection errors specifically
+      if (error.message.includes('timeout')) {
+        this.logger.error(`Get user timeout: ${error.message}`);
+        throw new InternalServerErrorException('User lookup timed out. Please try again.');
+      }
+      
+      if (error.message.includes('connection') || error.message.includes('ECONNREFUSED')) {
+        this.logger.error(`Connection error during user lookup: ${error.message}`);
+        throw new InternalServerErrorException('Service temporarily unavailable. Please try again later.');
+      }
+      
+      this.logger.error(`Unexpected getCurrentUser error: ${error.message}`, error.stack);
+      throw new InternalServerErrorException(MESSAGES.UNEXPECTED_ERROR);
     }
   }
 }

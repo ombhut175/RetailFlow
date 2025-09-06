@@ -23,6 +23,27 @@ export interface AuthenticatedRequest extends Request {
      * Contains all user metadata, auth info, etc.
      */
     supabaseUser: any;
+
+    /**
+     * User role information (added by role-based guards)
+     * Available after role-based guards have run
+     */
+    role?: {
+      /**
+       * User's role in the system
+       */
+      role: 'ADMIN' | 'MANAGER' | 'STAFF';
+      
+      /**
+       * Array of permissions assigned to the user
+       */
+      permissions: string[] | null;
+      
+      /**
+       * Whether the user's role is currently active
+       */
+      is_role_active: boolean;
+    };
   };
 }
 

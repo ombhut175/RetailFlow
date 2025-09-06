@@ -147,6 +147,29 @@ export const themes: Record<string, ThemeConfig> = {
       "Use animation and micro-interactions to make social actions feel rewarding and engaging",
     ],
   },
+  retail: {
+    name: "retail",
+    label: "Retail & Inventory",
+    primary: {
+      light: "emerald",
+      dark: "emerald",
+    },
+    neutral: {
+      light: "gray",
+      dark: "gray",
+    },
+    description: "Professional retail and inventory management interfaces with clear data hierarchy",
+    guidance: [
+      "Use emerald/green for successful transactions, stock availability, and positive metrics",
+      "Apply amber/orange for low stock warnings, pending orders, and attention-required states",
+      "Implement clean, scannable layouts optimized for quick data entry and barcode scanning",
+      "Design clear product imagery display with consistent aspect ratios and zoom capabilities",
+      "Prioritize numerical data visibility with monospace fonts for prices, quantities, and SKUs",
+      "Create intuitive inventory status indicators with color-coded stock levels and alerts",
+      "Optimize for touch-friendly POS interfaces with large, accessible buttons and clear feedback",
+      "Use professional gray tones to maintain focus on product data and transaction details",
+    ],
+  },
 }
 
 export function getThemeTokens(themeName: string, mode: "light" | "dark") {
@@ -183,6 +206,7 @@ export function getThemeTokens(themeName: string, mode: "light" | "dark") {
     indigo: { light: "oklch(0.488 0.243 264.376)", dark: "oklch(0.627 0.265 303.9)" },
     cyan: { light: "oklch(0.6 0.118 184.704)", dark: "oklch(0.696 0.17 184.704)" },
     plum: { light: "oklch(0.627 0.265 303.9)", dark: "oklch(0.645 0.246 16.439)" },
+    emerald: { light: "oklch(0.629 0.174 145.77)", dark: "oklch(0.696 0.17 145.77)" },
   }
 
   const primaryColor = theme.primary[mode] as keyof typeof primaryColors

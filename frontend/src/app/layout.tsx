@@ -24,8 +24,8 @@ if (typeof window === 'undefined') {
 }
 
 export const metadata: Metadata = {
-  title: "Quodo - Learning Platform",
-  description: "Accelerate your learning journey with personalized courses and expert mentorship",
+  title: "RetailFlow - Retail Management Platform",
+  description: "Streamline your retail business with smart POS, inventory management, and sales analytics",
   generator: "v0.app"
 };
 
@@ -38,7 +38,7 @@ export default function RootLayout({
       <body className={`font-sans antialiased overflow-x-hidden ${GeistSans.variable} ${GeistMono.variable}`}>
         <ErrorBoundary>
           <ErrorManagerProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="quodo-theme">
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="retailflow-theme">
               <ServerHealthChecker>
                 <AuthProvider>
                   <LoggerInit />
